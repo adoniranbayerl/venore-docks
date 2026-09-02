@@ -1,4 +1,0 @@
-ALTER TABLE "company_metrics"."tv_screens" DROP CONSTRAINT "company_metrics_tv_screens_kind_check";--> statement-breakpoint
-ALTER TABLE "company_metrics"."tv_screens" ADD COLUMN "definition_id" text;--> statement-breakpoint
-ALTER TABLE "company_metrics"."tv_screens" ADD CONSTRAINT "tv_screens_definition_id_metric_definitions_id_fk" FOREIGN KEY ("definition_id") REFERENCES "company_metrics"."metric_definitions"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "company_metrics"."tv_screens" ADD CONSTRAINT "company_metrics_tv_screens_kind_check" CHECK ("company_metrics"."tv_screens"."kind" in ('overview','sector_kpis','target_board','sector_targets','group_summary','metric_spotlight'));

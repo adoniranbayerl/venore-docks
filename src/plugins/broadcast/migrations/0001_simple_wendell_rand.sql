@@ -1,1 +1,0 @@
-ALTER TABLE "broadcast"."outputs" ADD COLUMN "offline" boolean DEFAULT false NOT NULL;

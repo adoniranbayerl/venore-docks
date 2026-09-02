@@ -1,20 +1,11 @@
-import { getMessageNavLink } from "@/plugins/academy";
+import { PLUGIN_CONTRIBUTIONS } from "@/plugins/contributions";
 import type { NavItem } from "@/contexts/themes";
 import { registerPlugins } from "../plugin-engine/register-plugins";
 
-// Itens que os plugins ativos contribuem para o MENU DO USUÁRIO (user-nav), não para o admin-nav.
-// Mesmo padrão de platform/notifications/notification-registry.ts: indexado pela key do manifesto,
-// só o plugin ativo entra, e platform/theme-rendering consome via este registry (não pode importar
-// um plugin diretamente — boundary). Hoje só "academy" (item "Mensagens"), mas outro plugin com
-// um destino pessoal (ex.: "Meus favoritos") só precisaria entrar neste mapa.
-const PLUGIN_PROVIDERS: Record<string, () => Promise<NavItem[]>> = {
-  academy: async () => {
-    const link = await getMessageNavLink();
-    if (!link.success || !link.data) return [];
-    return [{ key: "academy.messages", label: link.data.label, href: link.data.href, icon: "message-circle" }];
-  },
-};
-
+// Itens que os plugins ativos contribuem pro MENU DO USUÁRIO (user-nav), não pro admin-nav. Vêm
+// de src/plugins/*/contributions.ts (campo `userNavItems`), agregados em PLUGIN_CONTRIBUTIONS pelo
+// codegen — platform/theme-rendering não pode importar um plugin diretamente (boundary). Só o
+// plugin ativo entra.
 export async function collectUserNavItems(): Promise<NavItem[]> {
   const pluginReport = await registerPlugins();
   const activePluginKeys = new Set(
@@ -22,9 +13,9 @@ export async function collectUserNavItems(): Promise<NavItem[]> {
   );
 
   const items: NavItem[] = [];
-  for (const [key, provider] of Object.entries(PLUGIN_PROVIDERS)) {
-    if (!activePluginKeys.has(key)) continue;
-    items.push(...(await provider()));
+  for (const [key, contributions] of Object.entries(PLUGIN_CONTRIBUTIONS)) {
+    if (!activePluginKeys.has(key) || !contributions.userNavItems) continue;
+    items.push(...(await contributions.userNavItems()));
   }
   return items;
 }

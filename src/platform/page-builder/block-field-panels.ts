@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Block, BlockDefinition } from "@/contexts/cms";
-import { blockFieldPanels as academyBlockFieldPanels } from "@/plugins/academy/blocks/field-panels";
+import { PLUGIN_CLIENT_CONTRIBUTIONS } from "@/plugins/contributions.client";
 
 // Mesmo contrato de props de BlockFieldsPanel (block-fields-panel.tsx) — troca de painel é
 // transparente pro caller (composition-builder.tsx). Um bloco só ganha um painel aqui quando o
@@ -14,24 +14,20 @@ export type BlockFieldPanelProps = {
 };
 export type BlockFieldPanelComponent = (props: BlockFieldPanelProps) => ReactNode;
 
-// IMPORTANTE: importa direto de "@/plugins/academy/blocks/field-panels" — nunca de
-// "@/plugins/academy" nem "@/plugins/academy/blocks". Este arquivo é alcançável a partir de
-// composition-builder.tsx ("use client"); o barrel do plugin (index.ts) reexporta blockRenderers
-// do mesmo "./blocks", que puxa handler -> @/contexts/auth -> next-auth. Importar pelo caminho
-// errado vazaria esse encadeamento pro bundle client do builder do CMS (mesmo motivo de
-// block-renderers.tsx ser "server-only" e nunca ser importado por código client).
-// Superset chaveado por block key, igual PLUGIN_BLOCK_RENDERER_BARRELS. Não filtra por plugin
-// ativo: o painel só é consultado (composition-builder.tsx: blockFieldPanels[block.key]) pra um
-// bloco que já está no palette, e o palette (listBlockDefinitions(activePluginKeys)) é quem
-// remove os blocos de plugin desativado — uma entrada órfã aqui nunca é alcançada.
-const PLUGIN_BLOCK_FIELD_PANEL_BARRELS: Record<string, { blockFieldPanels?: Record<string, BlockFieldPanelComponent> }> = {
-  academy: { blockFieldPanels: academyBlockFieldPanels },
-};
-
+// Vem de PLUGIN_CLIENT_CONTRIBUTIONS (src/plugins/contributions.client.generated.ts) — o agregado
+// CLIENT, gerado pelo codegen a partir dos `contributions.client.ts` de cada plugin, que importam
+// os painéis DIRETO de "./blocks/field-panels". Esse caminho nunca passa por
+// "@/plugins/contributions" (server) nem por barrel de plugin, que arrastariam blockRenderers ->
+// handler -> @/contexts/auth -> next-auth pro bundle client do builder do CMS (mesmo motivo de
+// block-renderers.tsx ser "server-only").
+// Superset chaveado por block key. Não filtra por plugin ativo: o painel só é consultado
+// (composition-builder.tsx: blockFieldPanels[block.key]) pra um bloco que já está no palette, e o
+// palette (listBlockDefinitions(activePluginKeys)) é quem remove os blocos de plugin desativado —
+// uma entrada órfã aqui nunca é alcançada.
 function collectPluginFieldPanels(): Record<string, BlockFieldPanelComponent> {
   return Object.assign(
     {},
-    ...Object.values(PLUGIN_BLOCK_FIELD_PANEL_BARRELS).map((barrel) => barrel.blockFieldPanels ?? {}),
+    ...Object.values(PLUGIN_CLIENT_CONTRIBUTIONS).map((contributions) => contributions.blockFieldPanels ?? {}),
   );
 }
 

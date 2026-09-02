@@ -79,7 +79,7 @@ async function renderBlock(
     );
   }
 
-  const Renderer = resolveBlockRenderer(block.key);
+  const Renderer = await resolveBlockRenderer(block.key);
   if (!Renderer) {
     return <UnknownBlockWarning key={block.id} blockKey={block.key} />;
   }

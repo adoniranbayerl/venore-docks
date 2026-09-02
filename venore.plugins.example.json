@@ -1,0 +1,6 @@
+{
+  "_comment": "Copie para venore.plugins.json (gitignored) e ajuste. Alternativa: env VENORE_PLUGINS + VENORE_PLUGIN_REPO_BASE. Rode `npm run sync:plugins` depois. Ver docs/plugins-repos-separados-plano.md.",
+  "plugins": [
+    { "key": "broadcast", "repo": "https://github.com/adoniranbayerl/venore-plugin-broadcast.git", "ref": "main" }
+  ]
+}

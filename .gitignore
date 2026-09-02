@@ -43,6 +43,25 @@ yarn-error.log*
 # de cada instância. Default de MEDIA_FILESYSTEM_ROOT.
 /media-storage/
 
+# Gerados por scripts/gen-plugin-registry.ts a partir das pastas de plugin presentes
+# (postinstall/predev/prebuild). Ver docs/plugins-repos-separados-plano.md.
+/src/plugins/registry.generated.ts
+/src/plugins/route-registry.generated.ts
+/src/plugins/contributions.generated.ts
+/src/plugins/contributions.client.generated.ts
+/src/plugins/plugin-keys.generated.ts
+
+# Cada plugin é um repo próprio, sincronizado por `npm run sync:plugins` para src/plugins/<key>/
+# (opção 3, docs/plugins-repos-separados-plano.md). Nada de plugin é versionado no core — só os
+# reexports diretos (registry.ts etc.) e os fixtures _fixture-cross-* do teste de boundary.
+/src/plugins/*/
+!/src/plugins/_fixture-cross-a/
+!/src/plugins/_fixture-cross-b/
+
+# Config por-instância de quais plugins sincronizar (alternativa ao env VENORE_PLUGINS). Nunca
+# versionada — evita conflito de merge no core. Ver venore.plugins.example.json.
+/venore.plugins.json
+
 # broadcast plugin — vídeos são específicos de cada deploy/servidor, nunca devem ir pro Git
 # (arquivos grandes). .gitkeep preserva a pasta vazia num clone novo.
 /public/broadcast/videos/*
@@ -56,3 +75,6 @@ next-env.d.ts
 # O .zip é versionado (dá pra importar direto num clone/outra máquina); o manifest.json não.
 /docs/cursos/dist/*
 !/docs/cursos/dist/*.zip
+
+# Backup local dos plugins antigos durante a migração pra repos separados — nunca versionar.
+/backup/

@@ -1,1 +1,0 @@
-ALTER TABLE "academy"."lesson_activity_submissions" DROP CONSTRAINT "lesson_activity_submissions_content_check";

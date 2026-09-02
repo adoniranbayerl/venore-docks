@@ -8,21 +8,12 @@ import { requireTestDatabaseUrl } from "./require-test-database-url";
 // vence a corrida. Ver AGENTS.md, seção "Testes de integração".
 process.env.DATABASE_URL = requireTestDatabaseUrl();
 
-// Tabelas tocadas pelos seed helpers (academy-seed.ts) e pelos use cases sob teste. TRUNCATE ...
-// CASCADE em vez de transação com rollback: vários stores (ex: reorder-lessons, delete-lesson)
-// abrem sua própria db.transaction() pegando uma conexão nova do pool de app — uma transação
-// externa não commitada não seria visível pra essas conexões internas. TRUNCATE não tem esse
-// problema e não exige nenhuma mudança em client.ts.
+// Tabelas do CORE tocadas pelos use cases sob teste. TRUNCATE ... CASCADE em vez de transação com
+// rollback: vários stores abrem sua própria db.transaction() pegando uma conexão nova do pool de
+// app — uma transação externa não commitada não seria visível pra essas conexões internas.
+// TRUNCATE não tem esse problema e não exige nenhuma mudança em client.ts. Um plugin com testes
+// de integração acrescenta as próprias tabelas a partir do seu domínio.
 const INTEGRATION_TEST_TABLES = [
-  "academy.quiz_attempts",
-  "academy.lesson_video_completions",
-  "academy.lesson_text_completions",
-  "academy.quiz_questions",
-  "academy.lesson_requirements",
-  "academy.enrollments",
-  "academy.lessons",
-  "academy.courses",
-  "birthdays.birthdays",
   "cms.entries",
   "cms.content_types",
   "cms.categories",

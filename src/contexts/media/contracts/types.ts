@@ -70,24 +70,8 @@ export const MEDIA_ALLOWED_TYPES: Record<string, MediaAllowedTypeRule> = {
 export const AVATAR_MAX_SIZE_BYTES = 500 * 1024;
 
 // Categoria reservada auto-atribuída pelo upload de avatar (Fase 4/M1 — "pasta" de sistema,
-// primeiro caso concreto de herança de categoria por contexto de upload).
+// primeiro caso concreto de herança de categoria por contexto de upload). É o único caso
+// reservado do core; um plugin que precise de upload numa categoria reservada própria (entregas,
+// anexos) traz o próprio handler + constantes no seu domínio.
 export const AVATAR_RESERVED_CATEGORY_KEY = "avatars";
 export const AVATAR_RESERVED_CATEGORY_NAME = "Avatares";
-
-// Categoria reservada pra entrega de atividade prática do plugin academy (pedido de sessão:
-// aluno precisa conseguir enviar áudio/imagem/pdf pra uma lessonActivity) — mesmo padrão de
-// AVATAR_RESERVED_CATEGORY_KEY acima. Sempre "private" no upload; a leitura pelo professor não
-// passa pela visibilidade padrão (não tem media.manage), ver getMediaAssetForTrustedReview.
-export const ACTIVITY_SUBMISSION_RESERVED_CATEGORY_KEY = "activity-submissions";
-export const ACTIVITY_SUBMISSION_RESERVED_CATEGORY_NAME = "Entregas de atividade";
-
-// Categoria reservada pros anexos de chamado do plugin helpdesk (foto do problema, PDF de
-// orçamento) — mesmo padrão de ACTIVITY_SUBMISSION_RESERVED_CATEGORY_KEY acima. Sempre "private"
-// no upload; a equipe da fila lê via getMediaAssetForTrustedReview (o service do plugin já checou
-// o acesso ao chamado). Nunca escolhida pelo chamador.
-export const TICKET_ATTACHMENT_RESERVED_CATEGORY_KEY = "ticket-attachments";
-export const TICKET_ATTACHMENT_RESERVED_CATEGORY_NAME = "Anexos de chamado";
-
-// Teto próprio do anexo de chamado — abaixo do teto geral de imagem (8 MiB) e de PDF (20 MiB) em
-// MEDIA_ALLOWED_TYPES: anexo de chamado é foto de celular ou PDF curto, não arquivo de biblioteca.
-export const TICKET_ATTACHMENT_MAX_SIZE_BYTES = 15 * 1024 * 1024;

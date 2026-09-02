@@ -32,13 +32,27 @@ export type PluginApiRouteEntry = {
   handlers: Partial<Record<PluginApiMethod, PluginApiHandler>>;
 };
 
-// Tabela de rotas de um plugin — cada área é independente e opcional (nem todo plugin tem as
-// três). "admin" e "public" são casadas por src/app/(platform)/admin/[plugin]/[[...slug]]/page.tsx
-// e pelo catch-all do CMS respectivamente; "api" por src/app/api/[plugin]/[[...slug]]/route.ts.
+// Tabela de rotas de um plugin — cada área é independente e opcional (nem todo plugin tem todas).
+// "admin" e "public" são casadas por src/app/(platform)/admin/[plugin]/[[...slug]]/page.tsx e pelo
+// catch-all do CMS respectivamente; "api" por src/app/api/[plugin]/[[...slug]]/route.ts.
+//
+// "standalone" = página pública que precisa escapar POR COMPLETO da shell do (platform) (sem
+// header/nav/footer — ex: saída de TV, quiosque anônimo, telão). Não pode passar pelo catch-all
+// do CMS porque herdar (platform)/layout.tsx é automático ali. Vive sob o prefixo genérico ÚNICO
+// /ext/ — o core não tem pasta com nome de plugin. O pattern é o caminho DEPOIS de /ext/, no
+// mesmo vocabulário de "public" (ex: "broadcast/out/:token" → URL /ext/broadcast/out/:token).
+// Casada pelo dispatcher único src/app/ext/[...slug]/page.tsx via resolveStandalonePluginRoute.
+//
+// "sidebarContextual" = conteúdo do parallel route @sidebarContextual (coluna contextual do
+// layout). Padrão de caminho completo (ex: "academy/:courseSlug/:lessonId"). Casada pelo
+// dispatcher único em src/app/(platform)/@sidebarContextual/[[...slug]]/page.tsx, via
+// resolveSidebarContextualPluginRoute.
 export type PluginRouteTable = {
   admin?: PluginPageRouteEntry[];
   public?: PluginPageRouteEntry[];
   api?: PluginApiRouteEntry[];
+  standalone?: PluginPageRouteEntry[];
+  sidebarContextual?: PluginPageRouteEntry[];
 };
 
 // Cada page.tsx/route.ts real declara seu próprio shape de `params` (ex: `{ id: string }`,

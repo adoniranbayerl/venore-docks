@@ -19,26 +19,20 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     // short_name é o rótulo curto embaixo do ícone; o SO trunca sozinho se não couber. Sem uma
     // forma curta dedicada em settings, repete o nome (melhor que inventar uma abreviação).
     short_name: siteName,
-    description: `Área do aluno e cursos — ${siteName}.`,
+    description: siteName,
     lang: "pt-BR",
     dir: "ltr",
-    id: "/academy",
-    start_url: "/academy",
+    id: "/",
+    start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: CHROME_DARK,
     theme_color: CHROME_DARK,
-    categories: ["education", "music"],
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-    ],
-    // Atalhos no long-press do ícone (Android). iOS ignora.
-    shortcuts: [
-      { name: "Meus cursos", url: "/academy", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
-      { name: "Mensagens", url: "/academy/messages", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
     ],
   };
 }

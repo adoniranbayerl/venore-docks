@@ -1,30 +1,16 @@
-import type { OperationResult } from "@/shared/types";
-import { academySeeds } from "@/plugins/academy";
-import { birthdaysSeeds } from "@/plugins/birthdays";
-import { companyMetricsSeeds } from "@/plugins/company-metrics";
-import { helpdeskSeeds } from "@/plugins/helpdesk";
+import { PLUGIN_CONTRIBUTIONS } from "@/plugins/contributions";
+import type { PluginSeedFn } from "./plugin-contributions";
 
-// Uma função de seed é idempotente por contrato (list-then-skip pelo próprio seed) e devolve o
-// OperationResult<void> padrão — nunca lança para erro esperado.
-export type PluginSeedFn = () => Promise<OperationResult<void>>;
+// `PluginSeedFn` mora em plugin-contributions.ts agora; re-exportado aqui pra não quebrar os
+// `import type { PluginSeedFn } from "@/platform/plugin-engine/plugin-seed-registry"` dos plugins.
+export type { PluginSeedFn };
 
-// Registro estático dos seeds contribuídos por plugin (docs/venore-docks.md — "Sistema de
-// plugins"), mesmo padrão de platform/page-builder/block-registry.ts (PLUGIN_BLOCK_BARRELS):
-// Next.js exige import estático pra bundling, então um plugin que queira contribuir seeds expõe
-// `<plugin>Seeds: Record<seedKey, PluginSeedFn>` no próprio barrel (index.ts) e ganha uma entrada
-// aqui — nunca lido por scan de filesystem em runtime. broadcast e donations não têm seed
-// (broadcast depende de arquivos de mídia reais em disco; donations é settings-only).
-const PLUGIN_SEED_REGISTRY: Record<string, Record<string, PluginSeedFn>> = {
-  academy: academySeeds,
-  birthdays: birthdaysSeeds,
-  "company-metrics": companyMetricsSeeds,
-  helpdesk: helpdeskSeeds,
-};
-
+// Os seeds contribuídos por plugin vêm de src/plugins/*/contributions.ts (campo `seeds`),
+// agregados em PLUGIN_CONTRIBUTIONS pelo codegen — nada mais é enumerado à mão aqui.
 export function resolvePluginSeed(pluginKey: string, seedKey: string): PluginSeedFn | null {
-  return PLUGIN_SEED_REGISTRY[pluginKey]?.[seedKey] ?? null;
+  return PLUGIN_CONTRIBUTIONS[pluginKey]?.seeds?.[seedKey] ?? null;
 }
 
 export function listPluginSeedKeys(pluginKey: string): string[] {
-  return Object.keys(PLUGIN_SEED_REGISTRY[pluginKey] ?? {});
+  return Object.keys(PLUGIN_CONTRIBUTIONS[pluginKey]?.seeds ?? {});
 }

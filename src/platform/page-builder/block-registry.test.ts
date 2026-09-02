@@ -1,15 +1,27 @@
 import { describe, expect, it, vi } from "vitest";
-import { blockDefinitions as academyBlockDefinitions } from "@/plugins/academy/blocks/definitions";
-import { blockDefinitions as birthdaysBlockDefinitions } from "@/plugins/birthdays/blocks/definitions";
-import { blockDefinitions as donationsBlockDefinitions } from "@/plugins/donations/blocks/definitions";
+import type { BlockDefinition } from "@/contexts/cms";
 
-// block-registry.ts importa o barrel público de academy/birthdays/donations pra somar os blocos de
-// cada plugin; esses barrels reexportam handlers que puxam next-auth (não resolve nesse ambiente
-// de teste). Mocka só a superfície usada aqui (blockDefinitions), reaproveitando as definitions
-// reais de cada plugin — pure data, sem tocar em handler/store.
-vi.mock("@/plugins/academy", () => ({ blockDefinitions: academyBlockDefinitions }));
-vi.mock("@/plugins/birthdays", () => ({ blockDefinitions: birthdaysBlockDefinitions }));
-vi.mock("@/plugins/donations", () => ({ blockDefinitions: donationsBlockDefinitions }));
+// Sem plugins no repo (docs/plugins-repos-separados-plano.md) os blocos de plugin são fingidos
+// aqui: BlockDefinition é dado puro serializável, então uma fixture local exercita a mesma
+// agregação de block-registry.ts sem depender de nenhum plugin.
+function fakeLeafDefinition(key: string): BlockDefinition {
+  return {
+    key,
+    label: key,
+    category: "plugin",
+    structure: "leaf",
+    defaultData: {},
+    editorFields: [],
+    allowedInRoot: true,
+  };
+}
+
+vi.mock("@/plugins/contributions", () => ({
+  PLUGIN_CONTRIBUTIONS: {
+    alpha: { blockDefinitions: [fakeLeafDefinition("alpha.one"), fakeLeafDefinition("alpha.two")] },
+    beta: { blockDefinitions: [fakeLeafDefinition("beta.one")] },
+  },
+}));
 
 const { listBlockDefinitions } = await import("./block-registry");
 
@@ -23,5 +35,12 @@ describe("listBlockDefinitions", () => {
       const roundTripped = JSON.parse(JSON.stringify(definition));
       expect(roundTripped).toEqual(definition);
     }
+  });
+
+  it("inclui os blocos contribuídos por plugin além dos de core", () => {
+    const keys = listBlockDefinitions().map((definition) => definition.key);
+    expect(keys).toContain("alpha.one");
+    expect(keys).toContain("beta.one");
+    expect(keys).toContain("core.content.heading");
   });
 });

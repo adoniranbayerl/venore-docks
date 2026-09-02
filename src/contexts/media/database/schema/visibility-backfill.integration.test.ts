@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { db } from "@/infrastructure/database/client";
-import { seedUser } from "@/test-support/integration/academy-seed";
+import { seedUser } from "@/test-support/integration/user-seed";
 import { assets } from "./index";
 
 // Prova de garantia de schema (não de comportamento de aplicação): `uploaded_by` é NOT NULL e

@@ -283,3 +283,177 @@ o modelo novo.
 | Custo de setup | ~0 de código; disciplina de branch pra sempre. | 2–4 semanas (SDK + audit + codegen + extração). |
 | Custo recorrente | Imposto de merge ilimitado e manual, cresce com (branches × releases). | Contrato SDK versionado + job de integração + N+1 releases. Bounded e centralizável. |
 | Quando escolher | ≤ 3–4 instâncias, releases espaçados. | Muitas instâncias / releases frequentes / muitas combinações de plugin. |
+
+---
+
+## Estado da implementação
+
+### Fase 0 — auditoria de imports `@/…` dos 6 plugins (2026-09-02)
+
+`grep -rhoE 'from "@/[^"]+"' src/plugins` (fora de `@/plugins/`), por frequência:
+
+**Domínio / infra (superfície "server" do SDK):**
+| import | usos | vira |
+|---|---|---|
+| `@/shared/types` (`OperationResult`) | 225 | `@venore/plugin-sdk` |
+| `@/infrastructure/database/client` (`db`) | 201 | `@venore/plugin-sdk` |
+| `@/observability` | 115 | `@venore/plugin-sdk` |
+| `@/contexts/rbac` | 113 | `@venore/plugin-sdk` |
+| `@/contexts/auth` | 59 | `@venore/plugin-sdk` |
+| `@/contexts/cms` | 31 | `@venore/plugin-sdk` |
+| `@/contexts/media` | 25 | `@venore/plugin-sdk` |
+| `@/contexts/settings` | 11 | `@venore/plugin-sdk` |
+| `@/contexts/import-export` | 6 | `@venore/plugin-sdk` |
+| `@/contexts/web-push` | 1 | `@venore/plugin-sdk` |
+| `@/platform/plugin-engine/is-plugin-active` | 43 | `@venore/plugin-sdk` |
+| `@/platform/plugin-routing/types` | 7 | `@venore/plugin-sdk` |
+| `@/platform/plugin-engine/manifest-schema` | 7 | `@venore/plugin-sdk` |
+| `@/platform/plugin-engine/plugin-seed-registry` | 4 | `@venore/plugin-sdk` |
+| `@/platform/breadcrumbs/{types,define-segment}` | 6 | `@venore/plugin-sdk` |
+| `@/platform/brand/get-brand-config` | 2 | `@venore/plugin-sdk` |
+| `@/platform/page-builder/rich-text/render` | 2 | `@venore/plugin-sdk` |
+| `@/platform/media-usage/types`, `@/platform/media-lifecycle/delete-media-safely` | 2 | `@venore/plugin-sdk` |
+| `@/platform/theme-rendering/resolve-brand-aesthetics` | 1 | `@venore/plugin-sdk` |
+| `@/infrastructure/cache/memory-cache` | 2 | `@venore/plugin-sdk` |
+
+**UI / client (surpresa — é um kit inteiro → `@venore/plugin-sdk/ui`):**
+`@/components/ui/*` — button (97), input (35), badge (32), textarea (23), dialog (22), select (19),
+card (11), progress (6), tabs (4), table (3), chart (3), alert-dialog (3), switch (2),
+dropdown-menu (2), slider (1). Mais `@/components/{empty-state, admin-access-denied,
+admin-page-header, media-picker-field(+.actions), admin-stat-tile, interactive-notation,
+page-builder/block-renderer, pwa/push-toggle, pwa/offline-course-toggle}`,
+`@/hooks/{use-action-toast (61), use-pitch-listener}`, `@/lib/{utils (cn, 17), pitch-class}`,
+`@/platform/page-builder/{block-renderers (17), block-field-panels}`.
+
+**Testes → `@venore/plugin-sdk/testing`:** `@/test-support/integration/{academy,helpdesk,birthdays}-seed`.
+
+**Acoplamento a resolver na Fase 1 (core conhece nome de plugin):**
+`@/platform/admin-shell/get-<plugin>-page-data` — um arquivo por plugin em `platform/admin-shell/`
+(`academy`, `birthdays`, `helpdesk`, `donations`, `company-metrics`, `broadcast`). Idem
+`@/platform/academy-student/*` (5). Precisa virar um loader de gate genérico que o plugin compõe,
+não um arquivo por plugin no core.
+
+### Decisões refinadas da Fase 0
+
+- **`src/sdk/` com alias de tsconfig agora**, não `packages/` + workspaces. O SDK vive em
+  `src/sdk/{index,ui,testing}.ts` re-exportando a superfície; `tsconfig.paths` mapeia
+  `@venore/plugin-sdk` → `src/sdk/index.ts`, `@venore/plugin-sdk/ui` → `src/sdk/ui.ts`,
+  `@venore/plugin-sdk/testing` → `src/sdk/testing.ts`. Vira pacote publicável de verdade só na
+  extração (Fase 3), com bundle (tsup) reescrevendo os `@/…` internos.
+- **Três entrypoints** por causa do split server/client (um plugin client não pode value-importar
+  a superfície server — arrasta `pg`): `@venore/plugin-sdk` (server/domínio),
+  `@venore/plugin-sdk/ui` (React client), `@venore/plugin-sdk/testing`.
+- **`@venore/eslint-config`**: adiado pra Fase 3 (só é necessário quando os plugins são repos
+  separados de fato). Enquanto in-tree, o `eslint.config.mjs` do core cobre.
+- **Suíte de integração (Fase 5)**: começa como job no CI do core (matriz), não repo separado.
+- **Enforcement da Fase 2**: `no-restricted-imports` proibindo `@/*` em `src/plugins/**` (só
+  `@venore/plugin-sdk*` e relativo) — adicionado no fim da Fase 2, previne regressão.
+
+### Fase 1 — progresso (2026-09-02)
+
+Commits `a7df484` (parte 1) → `cd6a1e6` (parte 5). Cada parte com lint + typecheck + `npm run test`
+verdes.
+
+- **parte 1 — codegen.** `scripts/gen-plugin-registry.ts` varre `src/plugins/*/` presentes e gera
+  `registry.generated.ts` / `route-registry.generated.ts` (gitignored, rodado nos `pre*` hooks do
+  npm). `src/plugins/{registry,route-registry}.ts` viram reexport fino. Plugin ausente = não entra,
+  sem import fixo pra quebrar o build.
+- **parte 2 — modelo de contribuição.** `PluginContributions` (`platform/plugin-engine/
+  plugin-contributions.ts`): breadcrumbs, `notificationAlert`, `mediaUsageResolver`, `userNavItems`,
+  `seeds`. Cada plugin declara em `src/plugins/<key>/contributions.ts`; codegen agrega em
+  `contributions.generated.ts`. 5 registries de `platform/` (breadcrumbs, notifications,
+  media-usage, user-nav, seed-registry) deixam de `import "@/plugins/<x>"` e iteram
+  `PLUGIN_CONTRIBUTIONS`. Handlers que puxam next-auth ficam atrás de `import()` preguiçoso.
+- **parte 3 — blocos.** `blockDefinitions` (dado) entra em `contributions.ts`; `blockRenderers`
+  vira loader preguiçoso (`() => import("./blocks/renderers")`) porque puxa a cadeia de auth.
+  `blockFieldPanels` é client-reachable (builder do CMS) → tipo `PluginClientContributions` +
+  `contributions.client.ts` + `contributions.client.generated.ts`, agregado à parte que **nunca**
+  passa por `@/plugins/contributions` (server) nem por barrel de plugin. `block-registry.ts` /
+  `block-renderers.tsx` / `block-field-panels.ts` iteram os agregados. `resolveBlockRenderer` /
+  `listBlockRendererKeys` viraram async (memoizam o load preguiçoso).
+- **parte 4 — academy-student.** `src/platform/academy-student/` (consumido só pelas rotas do
+  próprio academy, importava `@/plugins/academy`) movido pra `src/plugins/academy/student/`.
+- **parte 5 — gate admin de seção.** `get-<plugin>-page-data.ts` (6 arquivos quase idênticos em
+  `platform/admin-shell/`) → `getPluginAdminPageData(pluginKey)`. As permissions da seção saem do
+  manifesto (união dos `requiredPermission` da `navigation`). 13 call sites atualizados.
+
+- **parte 6a — rotas standalone + slot via registro** (commit `8fbde16`). Os 5 shims físicos de
+  reexport (`export { default } from "@/plugins/<x>/..."`) viravam import quebrado sem o plugin.
+  Trocados por dispatchers genéricos que resolvem pela route-table em runtime (opção "registro em
+  runtime", não codegen). `PluginRouteTable` ganha 2 áreas: `standalone` (páginas fora da shell
+  `(platform)`, caminho completo) e `sidebarContextual` (slot paralelo). Resolvers novos
+  (`resolve-standalone-route.ts`, `resolve-sidebar-contextual-route.ts`).
+  `src/app/{broadcast,chamados,company-metrics}/[...slug]/page.tsx` = 1 dispatcher por prefixo de
+  URL (só o prefixo é físico); `src/app/(platform)/@sidebarContextual/[...slug]/page.tsx` =
+  dispatcher único do slot (catch-all **obrigatório** — `[[...slug]]` colide com a page `/` do
+  route group no `next build`).
+- **parte 6b — páginas de conteúdo via contribuição** (commit `cabf7f5`). `PluginContributions`
+  ganha `adminDashboardPanel` e `publicHomeShowcase` (thunks preguiçosos com gate/fetch próprio →
+  JSX ou null; a página do core usa o primeiro não-nulo). JSX movido do core pro plugin em
+  `src/plugins/academy/content-slots/`. `admin/page.tsx` e `(platform)/page.tsx` deixam de
+  importar `@/plugins/academy`.
+
+**Fase 1 concluída.** `grep -rn "@/plugins/<nome>" src/platform src/app` = 0 (só os agregados
+genéricos `registry`/`route-registry`/`contributions`/`contributions.client`, que são o próprio
+sistema de plugin, não plugin específico). `npm run build` passa; passa também com
+`src/plugins/broadcast/` removido (dispatcher genérico → `notFound()`).
+
+**Achado pra Fase 2:** `academy` importava `@/plugins/donations` (barrel) em 4 rotas —
+dependência cross-plugin OPCIONAL. Resolver na Fase 2 (SDK): `import()` preguiçoso ou barrel de
+donations sempre resolvível.
+
+### Core esvaziado dos plugins (2026-09-02, commits `03ac7bd`..`40a5af1`)
+
+Decisão do dono: o repo venore-docks NÃO deve conter código nem domínio de plugin. Os 6 plugins
+foram feitos backup e **removidos**; serão reconstruídos como repos próprios contra o contrato
+limpo (SDK + registries gerados + dispatchers genéricos).
+
+- `03ac7bd` — remove `src/plugins/{academy,birthdays,broadcast,company-metrics,donations,helpdesk}/`
+  (~125k linhas), os `*-seed.ts` de plugin (`seedUser` genérico → `test-support/integration/
+  user-seed.ts`), `src/sdk/testing.ts`, os `db:*:<plugin>` do package.json, scripts e docs de
+  plugin. Codegen já degrada pra registries vazios; testes de block-registry/-renderers passam a
+  usar fixtures locais.
+- `6939c0b` — `src/app/{broadcast,chamados,company-metrics}/` (prefixo nomeado) → **um** prefixo
+  genérico: `src/app/ext/[...slug]/page.tsx`. Toda rota shell-less de plugin vira
+  `/ext/<caminho-que-o-plugin-declara>` (área `standalone` da route-table). Escolha do dono:
+  "prefixo genérico único" (URLs dos plugins mudam — ok, vão ser reconstruídos).
+  `has-sidebar-contextual-content.ts` deriva os padrões de `PLUGIN_ROUTE_TABLES`.
+- `40a5af1` — varre nome/domínio de plugin de `contexts/` e do resto: `contexts/media` perde os 2
+  uploads de categoria reservada de plugin (activity-submission/ticket-attachment) + constantes;
+  `observability/origin-registry.ts` deriva nomes de plugin do `PLUGIN_REGISTRY`; primitivos de
+  música (`interactive-notation`, `use-pitch-listener`, `pitch-class`) e `offline-course-toggle`
+  removidos de `src/components|hooks|lib` + `sdk/ui.ts`; `public/sw.js` perde o cache de aulas;
+  `app/manifest.ts` neutro; `package.json` perde `abcjs`/`pitchy`/`qrcode`/`papaparse`.
+
+Estado: `npm run lint` + `typecheck` + `test` (177 arq/767) + `build` verdes com `src/plugins/`
+só com `.gitkeep` + os 4 arquivos de reexport (`registry`/`route-registry`/`contributions`/
+`contributions.client`) + os fixtures `_fixture-cross-*` do teste de boundary.
+
+**Pendências deixadas explícitas:**
+- `src/app/(platform)/page.tsx` redireciona usuário logado não-admin pra `/academy` — decisão de
+  produto (o que a home faz sem o plugin de área do aluno?), não mexido.
+- `docs/venore-docks.md` + `AGENTS.md` ainda descrevem os 6 plugins como se estivessem no repo —
+  passada de docs pendente.
+- `contexts/media`: quando o 1º plugin voltar, avaliar um handler genérico
+  `uploadReservedCategoryAsset(categoryKey, name, ...)` no core em vez de um por plugin.
+- `src/components/ui/chart` (recharts) fica — é primitivo shadcn do kit, não código de plugin.
+
+### Mecanismo de sync + contrato do SDK validado (2026-09-02, NÃO commitado)
+
+- **`.gitignore`**: `/src/plugins/*/` ignorado (com `!` pros `_fixture-cross-*`); `venore.plugins.json`
+  ignorado. Só os 4 reexports diretos ficam versionados.
+- **`scripts/sync-plugins.ts`** (`npm run sync:plugins`): lê `venore.plugins.json` (`{plugins:[{key,repo,ref}]}`)
+  ou `VENORE_PLUGINS` + `VENORE_PLUGIN_REPO_BASE`. Clona/atualiza cada `venore-plugin-<key>` em
+  `src/plugins/<key>/` (shallow, `git checkout --force FETCH_HEAD` + `git clean` na atualização),
+  remove os que saíram da config (só os que têm `.git` — não toca no que foi posto à mão), e roda
+  o codegen. Sem config = no-op. `.env.example` + `venore.plugins.example.json` incluídos.
+- **Validado end-to-end** com um plugin mínimo externo (`venore-plugin-hello`, repo git local):
+  `sync:plugins` clonou → `git status` limpo (gitignored) → codegen achou → `typecheck`/`lint`/
+  `build` verdes com o plugin de fora importando só `@venore/plugin-sdk`.
+- **Gap do SDK achado e corrigido**: `PluginContributions`/`PluginSeedFn` não eram exportados de
+  `@venore/plugin-sdk` (só de `@/platform/...`); `PluginClientContributions` faltava em
+  `@venore/plugin-sdk/ui`. Adicionados. (Esperado achar mais buracos ao reconstruir um plugin de
+  verdade — Fase 2.)
+- **Ainda falta pra Fase 2**: `no-restricted-imports` proibindo `@/*` em `src/plugins/**` (depende
+  de decidir como lintar pasta sincronizada/gitignored); reconstruir os 6 plugins de verdade
+  contra o contrato; `vercel-build`/deploy chamando `sync:plugins` antes do build.

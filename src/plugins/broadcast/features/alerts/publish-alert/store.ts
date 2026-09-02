@@ -1,8 +1,0 @@
-import { db } from "@/infrastructure/database/client";
-import { broadcastAlerts } from "../../../database/schema";
-import type { BroadcastAlertRecord } from "../../../contracts/types";
-
-export async function insertAlert(input: { message: string; expiresAt: Date }): Promise<BroadcastAlertRecord> {
-  const [row] = await db.insert(broadcastAlerts).values(input).returning();
-  return row as BroadcastAlertRecord;
-}

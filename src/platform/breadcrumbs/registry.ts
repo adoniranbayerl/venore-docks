@@ -7,9 +7,7 @@ import { mediaBreadcrumbSegments } from "@/contexts/media";
 import { settingsBreadcrumbSegments } from "@/contexts/settings";
 import { themesBreadcrumbSegments } from "@/contexts/themes";
 import { observabilityBreadcrumbSegments } from "@/observability";
-import { academyBreadcrumbSegments } from "@/plugins/academy";
-import { birthdaysBreadcrumbSegments } from "@/plugins/birthdays";
-import { donationsBreadcrumbSegments } from "@/plugins/donations";
+import { PLUGIN_CONTRIBUTIONS } from "@/plugins/contributions";
 import { getActivePluginKeys } from "@/platform/plugin-engine/get-active-plugin-keys";
 
 // Segmentos que SEMPRE valem — core (platform + contexts). Nenhum depende de plugin.
@@ -23,15 +21,10 @@ const CORE_BREADCRUMB_SEGMENTS: BreadcrumbSegmentDefinition[] = [
   ...observabilityBreadcrumbSegments,
 ];
 
-// Segmentos por plugin, chaveados pela mesma `key` do manifesto — só entram na trilha quando o
-// plugin está ativo (mesmo padrão de PLUGIN_BLOCK_BARRELS). Um plugin desativado tem o caminho
-// "reservado" (o catch-all do CMS devolve notFound pra ele, ver AGENTS.md 1.1), então não faz
-// sentido resolver rótulo de breadcrumb pra uma rota que não renderiza.
-const PLUGIN_BREADCRUMB_SEGMENTS: Record<string, BreadcrumbSegmentDefinition[]> = {
-  academy: academyBreadcrumbSegments,
-  birthdays: birthdaysBreadcrumbSegments,
-  donations: donationsBreadcrumbSegments,
-};
+// Segmentos por plugin: vêm de src/plugins/*/contributions.ts (campo `breadcrumbSegments`),
+// agregados em PLUGIN_CONTRIBUTIONS pelo codegen. Só entram na trilha quando o plugin está ativo
+// — plugin desativado tem o caminho "reservado" (o catch-all do CMS devolve notFound pra ele,
+// ver AGENTS.md 1.1), não faz sentido resolver rótulo de breadcrumb pra uma rota que não renderiza.
 
 // Registro de breadcrumbs (mesmo padrão de platform/admin-shell/admin-navigation-registry.ts):
 // cada context/plugin declara os próprios segmentos num breadcrumbs.ts, reexportado pelo barrel
@@ -42,9 +35,9 @@ export const collectBreadcrumbSegments = cache(async (): Promise<BreadcrumbSegme
   const activePluginKeys = await getActivePluginKeys();
   const segments: BreadcrumbSegmentDefinition[] = [
     ...CORE_BREADCRUMB_SEGMENTS,
-    ...Object.entries(PLUGIN_BREADCRUMB_SEGMENTS)
+    ...Object.entries(PLUGIN_CONTRIBUTIONS)
       .filter(([pluginKey]) => activePluginKeys.has(pluginKey))
-      .flatMap(([, pluginSegments]) => pluginSegments),
+      .flatMap(([, contributions]) => contributions.breadcrumbSegments ?? []),
   ];
   assertUniqueBreadcrumbTemplates(segments);
   return segments;

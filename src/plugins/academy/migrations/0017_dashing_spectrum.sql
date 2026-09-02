@@ -1,1 +1,0 @@
-ALTER TABLE "academy"."lesson_activity_submissions" ADD COLUMN "review_seen_at" timestamp with time zone;

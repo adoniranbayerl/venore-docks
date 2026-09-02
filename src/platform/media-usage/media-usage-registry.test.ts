@@ -13,8 +13,11 @@ vi.mock("../brand/find-brand-media-usage", () => ({
   findBrandMediaUsage: (...args: unknown[]) => findBrandMediaUsage(...args),
 }));
 
-vi.mock("@/plugins/academy", () => ({
-  findAcademyMediaUsage: (...args: unknown[]) => findAcademyMediaUsage(...args),
+// O resolver de uso de mídia do plugin vem de PLUGIN_CONTRIBUTIONS agora (campo mediaUsageResolver).
+vi.mock("@/plugins/contributions", () => ({
+  PLUGIN_CONTRIBUTIONS: {
+    academy: { mediaUsageResolver: (...args: unknown[]) => findAcademyMediaUsage(...args) },
+  },
 }));
 
 vi.mock("../plugin-engine/register-plugins", () => ({

@@ -1,26 +1,16 @@
-// Service worker da PWA.
+// Service worker da PWA (core).
 //
-// Fase 1 — instalável + tela offline:
-//   - navegação (mode "navigate"): network-first; se a rede falhar, serve /offline
-//     (ou a aula baixada, se houver — Fase 2).
+//   - navegação (mode "navigate"): network-first; se a rede falhar, serve /offline.
 //   - app-shell estático (/_next/static, /icons, /brand, fontes): stale-while-revalidate.
 //   - resto (API, auth, mídia própria): passa direto.
-// Fase 2 — aulas offline:
-//   - cache "lessons-v1" preenchido sob demanda pelo componente "Baixar para offline"
-//     (mensagem CACHE_URLS). Navegações em /academy/** caem nele quando offline.
-//   - soundfont do abcjs (paulrosen.github.io): cache-first, pra o "Ouvir" funcionar offline
-//     depois de ter tocado uma vez online.
-// Fase 3 — push: handlers push + notificationclick no fim do arquivo.
+//   - push: handlers push + notificationclick no fim do arquivo.
 //
 // Pra invalidar o shell, incremente SHELL_VERSION.
 const SHELL_VERSION = "v1";
 const SHELL_CACHE = `shell-${SHELL_VERSION}`;
-const LESSONS_CACHE = "lessons-v1";
-const SOUNDFONT_CACHE = "soundfont-v1";
-const SOUNDFONT_HOST = "paulrosen.github.io";
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png", "/icons/icon-512.png"];
-const OWNED_CACHES = new Set([SHELL_CACHE, LESSONS_CACHE, SOUNDFONT_CACHE]);
+const OWNED_CACHES = new Set([SHELL_CACHE]);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -41,28 +31,6 @@ self.addEventListener("message", (event) => {
   const data = event.data || {};
   if (data.type === "SKIP_WAITING") {
     self.skipWaiting();
-    return;
-  }
-  // "Baixar para offline" / "Remover download": o componente manda a lista de URLs e uma porta
-  // de resposta (MessageChannel).
-  if (data.type === "CACHE_URLS" && Array.isArray(data.urls)) {
-    event.waitUntil(
-      caches
-        .open(data.cacheName || LESSONS_CACHE)
-        .then((cache) => Promise.all(data.urls.map((url) => cache.add(new Request(url, { cache: "reload" })))))
-        .then(() => event.ports[0]?.postMessage({ ok: true }))
-        .catch((error) => event.ports[0]?.postMessage({ ok: false, error: String(error) })),
-    );
-    return;
-  }
-  if (data.type === "UNCACHE_URLS" && Array.isArray(data.urls)) {
-    event.waitUntil(
-      caches
-        .open(data.cacheName || LESSONS_CACHE)
-        .then((cache) => Promise.all(data.urls.map((url) => cache.delete(url, { ignoreSearch: true }))))
-        .then(() => event.ports[0]?.postMessage({ ok: true }))
-        .catch((error) => event.ports[0]?.postMessage({ ok: false, error: String(error) })),
-    );
   }
 });
 
@@ -81,29 +49,11 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-
-  // Soundfont do abcjs (cross-origin) — cache-first pra o "Ouvir" funcionar offline.
-  if (url.hostname === SOUNDFONT_HOST) {
-    event.respondWith(
-      caches.open(SOUNDFONT_CACHE).then(async (cache) => {
-        const cached = await cache.match(request);
-        if (cached) return cached;
-        const response = await fetch(request);
-        if (response && (response.ok || response.type === "opaque")) cache.put(request, response.clone());
-        return response;
-      }),
-    );
-    return;
-  }
-
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(async () => {
-        const lessons = await caches.open(LESSONS_CACHE);
-        const offlineLesson = await lessons.match(request, { ignoreSearch: true });
-        if (offlineLesson) return offlineLesson;
         const shell = await caches.open(SHELL_CACHE);
         return (await shell.match(OFFLINE_URL)) ?? Response.error();
       }),

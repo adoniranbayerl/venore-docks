@@ -37,9 +37,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
-import { blockRenderers as academyBlockRenderers } from "@/plugins/academy";
-import { blockRenderers as birthdaysBlockRenderers } from "@/plugins/birthdays";
-import { blockRenderers as donationsBlockRenderers } from "@/plugins/donations";
+import { PLUGIN_CONTRIBUTIONS } from "@/plugins/contributions";
 import { ROW_BLOCK_KEY, resolveRowColumns, resolveRowGridClasses } from "./row-columns";
 
 type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
@@ -704,34 +702,36 @@ const CORE_BLOCK_RENDERERS: Record<string, BlockRendererComponent> = {
   "core.layout.card-grid": CardGridBlock,
 };
 
-// Mesmo padrão de PLUGIN_BLOCK_BARRELS em block-registry.ts: import estático (Next exige pra
-// bundling), chave = manifest.key. Paralelo ao registry de definitions, mas nunca cruza o
-// boundary RSC — este módulo é "server-only". O gate por plugin ATIVO fica no dispatch de render
+// Renderers de plugin vêm de PLUGIN_CONTRIBUTIONS[key].blockRenderers — um LOADER preguiçoso
+// (`() => import("./blocks/renderers")`), porque a árvore de componentes de render sobe até
+// @/contexts/auth -> next-auth e não pode entrar no grafo estático de quem só lê
+// breadcrumbs/seeds. Este módulo é "server-only", então resolver os renderers de forma assíncrona
+// aqui é seguro (nunca cruza o boundary RSC). O gate por plugin ATIVO fica no dispatch de render
 // (components/page-builder/block-renderer.tsx, via pluginKeyForBlockKey + getActivePluginKeys):
 // este mapa é só o superset chaveado por block key, e uma entrada de plugin desativado aqui é
 // inerte porque renderBlock nunca chega a resolvê-la.
-const PLUGIN_BLOCK_RENDERER_BARRELS: Record<string, { blockRenderers?: Record<string, BlockRendererComponent> }> = {
-  academy: { blockRenderers: academyBlockRenderers },
-  birthdays: { blockRenderers: birthdaysBlockRenderers },
-  donations: { blockRenderers: donationsBlockRenderers },
-};
+let cachedRenderers: Promise<Record<string, BlockRendererComponent>> | null = null;
 
-function collectPluginRenderers(): Record<string, BlockRendererComponent> {
-  return Object.assign(
-    {},
-    ...Object.values(PLUGIN_BLOCK_RENDERER_BARRELS).map((barrel) => barrel.blockRenderers ?? {}),
+async function loadAllBlockRenderers(): Promise<Record<string, BlockRendererComponent>> {
+  const pluginMaps = await Promise.all(
+    Object.values(PLUGIN_CONTRIBUTIONS).map((contributions) =>
+      contributions.blockRenderers ? contributions.blockRenderers() : Promise.resolve({}),
+    ),
   );
+  return Object.assign({}, CORE_BLOCK_RENDERERS, ...pluginMaps);
 }
 
-const ALL_BLOCK_RENDERERS: Record<string, BlockRendererComponent> = {
-  ...CORE_BLOCK_RENDERERS,
-  ...collectPluginRenderers(),
-};
-
-export function resolveBlockRenderer(key: string): BlockRendererComponent | null {
-  return ALL_BLOCK_RENDERERS[key] ?? null;
+function getAllBlockRenderers(): Promise<Record<string, BlockRendererComponent>> {
+  if (!cachedRenderers) {
+    cachedRenderers = loadAllBlockRenderers();
+  }
+  return cachedRenderers;
 }
 
-export function listBlockRendererKeys(): string[] {
-  return Object.keys(ALL_BLOCK_RENDERERS);
+export async function resolveBlockRenderer(key: string): Promise<BlockRendererComponent | null> {
+  return (await getAllBlockRenderers())[key] ?? null;
+}
+
+export async function listBlockRendererKeys(): Promise<string[]> {
+  return Object.keys(await getAllBlockRenderers());
 }

@@ -3,6 +3,10 @@ import { drainEvents, drainTraceEntries } from "./buffer";
 
 vi.mock("./flush", () => ({ flushNow: vi.fn() }));
 
+// origin-registry.ts deriva os nomes de plugin de plugin-keys.generated.ts (vazio no repo do
+// core). Uma key fingida cobre o ramo "plugin:".
+vi.mock("@/plugins/plugin-keys.generated", () => ({ PLUGIN_KEYS: ["demo"] }));
+
 describe("operation log", () => {
   beforeEach(() => {
     drainEvents();
@@ -115,7 +119,7 @@ describe("operation log", () => {
     const contextHandle = beginOperation({ useCase: "rbac.grant-superadmin", actor: { id: "u1", type: "user" }, kind: "write" });
     endOperation(contextHandle, { success: true });
 
-    const pluginHandle = beginOperation({ useCase: "academy.publish-course", actor: { id: "u1", type: "user" }, kind: "write" });
+    const pluginHandle = beginOperation({ useCase: "demo.publish-thing", actor: { id: "u1", type: "user" }, kind: "write" });
     endOperation(pluginHandle, { success: true });
 
     const explicitHandle = beginOperation({
@@ -128,7 +132,7 @@ describe("operation log", () => {
 
     const [contextEvent, pluginEvent, explicitEvent] = drainEvents();
     expect(contextEvent.origin).toBe("context:rbac");
-    expect(pluginEvent.origin).toBe("plugin:academy");
+    expect(pluginEvent.origin).toBe("plugin:demo");
     expect(explicitEvent.origin).toBe("system:cron");
   });
 

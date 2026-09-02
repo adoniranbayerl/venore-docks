@@ -1,20 +1,6 @@
-import type { PluginRouteTable } from "@/platform/plugin-routing/types";
-import { academyRouteTable } from "./academy/routes/route-table";
-import { birthdaysRouteTable } from "./birthdays/routes/route-table";
-import { donationsRouteTable } from "./donations/routes/route-table";
-import { broadcastRouteTable } from "./broadcast/routes/route-table";
-import { companyMetricsRouteTable } from "./company-metrics/routes/route-table";
-import { helpdeskRouteTable } from "./helpdesk/routes/route-table";
-
-// Registro das route-tables dos plugins instalados, chaveado pela mesma `key` do manifesto (ver
-// src/plugins/registry.ts) — mesmo padrão de import estático (Next.js exige pra bundling), agora
-// pra roteamento em vez de metadado. Instalar um plugin novo com rota própria é uma entrada nova
-// aqui, não um scan de filesystem em runtime.
-export const PLUGIN_ROUTE_TABLES: Record<string, PluginRouteTable> = {
-  academy: academyRouteTable,
-  birthdays: birthdaysRouteTable,
-  donations: donationsRouteTable,
-  broadcast: broadcastRouteTable,
-  "company-metrics": companyMetricsRouteTable,
-  helpdesk: helpdeskRouteTable,
-};
+// Registro das route-tables dos plugins instalados, chaveado pela `key` do manifesto. O conteúdo
+// é GERADO por scripts/gen-plugin-registry.ts (postinstall / predev / prebuild) a partir das
+// pastas presentes em src/plugins/*/routes/route-table.ts — ver docs/plugins-repos-separados-plano.md.
+// Este arquivo continua sendo o import estável (`import { PLUGIN_ROUTE_TABLES } from
+// "@/plugins/route-registry"`).
+export { PLUGIN_ROUTE_TABLES } from "./route-registry.generated";

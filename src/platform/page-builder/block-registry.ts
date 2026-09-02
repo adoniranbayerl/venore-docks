@@ -1,7 +1,5 @@
 import type { AreaDefinition, BlockDefinition, ResolveBlockDefinition } from "@/contexts/cms";
-import { blockDefinitions as academyBlockDefinitions } from "@/plugins/academy";
-import { blockDefinitions as birthdaysBlockDefinitions } from "@/plugins/birthdays";
-import { blockDefinitions as donationsBlockDefinitions } from "@/plugins/donations";
+import { PLUGIN_CONTRIBUTIONS } from "@/plugins/contributions";
 import { buttonBlockDefinition } from "./blocks/button";
 import { headingBlockDefinition } from "./blocks/heading";
 import { imageBlockDefinition } from "./blocks/image";
@@ -42,16 +40,17 @@ const CORE_LEAF_BLOCKS: BlockDefinition[] = [
 ];
 
 // contexts/cms não conhece plugin nenhum (regra de boundary da sessão) — este registry mora em
-// platform/ exatamente pra poder importar tanto contexts/cms/contracts quanto o barrel público
-// de cada plugin. Next.js exige import estático pra bundling (mesmo motivo de
-// src/plugins/registry.ts), então um plugin que queira contribuir blocos expõe
-// `blockDefinitions: BlockDefinition[]` no próprio barrel (index.ts) e ganha uma entrada aqui —
-// nunca lido por scan de filesystem em runtime.
-const PLUGIN_BLOCK_BARRELS: Record<string, { blockDefinitions?: BlockDefinition[] }> = {
-  academy: { blockDefinitions: academyBlockDefinitions },
-  birthdays: { blockDefinitions: birthdaysBlockDefinitions },
-  donations: { blockDefinitions: donationsBlockDefinitions },
-};
+// platform/ e lê PLUGIN_CONTRIBUTIONS (src/plugins/contributions.generated.ts, agregado pelo
+// codegen a partir dos plugins presentes). Um plugin que contribui blocos declara
+// `blockDefinitions: BlockDefinition[]` (dado puro, serializável) no `contributions.ts` dele —
+// nunca lido por scan de filesystem em runtime, e um plugin ausente simplesmente não aparece no
+// mapa.
+const PLUGIN_BLOCK_BARRELS: Record<string, { blockDefinitions?: BlockDefinition[] }> = Object.fromEntries(
+  Object.entries(PLUGIN_CONTRIBUTIONS).map(([key, contributions]) => [
+    key,
+    { blockDefinitions: contributions.blockDefinitions },
+  ]),
+);
 
 // Owner (plugin key) de cada block key contribuída por plugin — usado pra filtrar por plugin
 // ativo em listBlockDefinitions(activePluginKeys) e pra gate no dispatch de render

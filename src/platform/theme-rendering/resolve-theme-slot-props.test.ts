@@ -35,6 +35,12 @@ vi.mock("@/platform/brand/get-brand-config", () => ({
   getBrandConfig: (...args: unknown[]) => getBrandConfig(...args),
 }));
 
+// Este teste não exercita contribuição de plugin. Com um plugin instalado, PLUGIN_CONTRIBUTIONS
+// deixa de ser vazio e arrasta transitivamente (via @venore/plugin-sdk -> delete-media-safely ->
+// media-usage-registry) módulos que os mocks parciais daqui não cobrem. Zerar o mapa corta a
+// cadeia sem afetar o que o teste mede.
+vi.mock("@/plugins/contributions", () => ({ PLUGIN_CONTRIBUTIONS: {} }));
+
 vi.mock("@/platform/header-behavior/get-header-behavior", () => ({
   getHeaderBehavior: (...args: unknown[]) => getHeaderBehavior(...args),
 }));

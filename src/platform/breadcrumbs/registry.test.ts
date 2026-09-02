@@ -19,9 +19,14 @@ vi.mock("@/contexts/media", () => ({ mediaBreadcrumbSegments: [] }));
 vi.mock("@/contexts/settings", () => ({ settingsBreadcrumbSegments: [] }));
 vi.mock("@/contexts/themes", () => ({ themesBreadcrumbSegments: [] }));
 vi.mock("@/observability", () => ({ observabilityBreadcrumbSegments: [] }));
-vi.mock("@/plugins/academy", () => ({ academyBreadcrumbSegments: [seg("academy.public.list", ["academy"])] }));
-vi.mock("@/plugins/birthdays", () => ({ birthdaysBreadcrumbSegments: [seg("birthdays.public", ["aniversariantes"])] }));
-vi.mock("@/plugins/donations", () => ({ donationsBreadcrumbSegments: [seg("donations.public", ["donations"])] }));
+// Segmentos de plugin agora vêm de PLUGIN_CONTRIBUTIONS (src/plugins/contributions.generated.ts).
+vi.mock("@/plugins/contributions", () => ({
+  PLUGIN_CONTRIBUTIONS: {
+    academy: { breadcrumbSegments: [seg("academy.public.list", ["academy"])] },
+    birthdays: { breadcrumbSegments: [seg("birthdays.public", ["aniversariantes"])] },
+    donations: { breadcrumbSegments: [seg("donations.public", ["donations"])] },
+  },
+}));
 
 const { collectBreadcrumbSegments } = await import("./registry");
 

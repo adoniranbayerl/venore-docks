@@ -4,8 +4,9 @@ import { ArrowRight, BookOpen, Settings2 } from "lucide-react";
 import { getEntryBody, getEntryComposition, getPublishedEntryBySlug, recordEntryView } from "@/contexts/cms";
 import { getCurrentUser } from "@/contexts/auth";
 import { getAdminPageData } from "@/platform/admin-shell/get-admin-page-data";
+import { getActivePluginKeys } from "@/platform/plugin-engine/get-active-plugin-keys";
 import { getBrandConfig } from "@/platform/brand/get-brand-config";
-import { CourseCover, listPublicCourses } from "@/plugins/academy";
+import { PLUGIN_CONTRIBUTIONS } from "@/plugins/contributions";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { BlockRenderer } from "@/components/page-builder/block-renderer";
@@ -19,10 +20,19 @@ const HOME_SLUG = "home";
 
 // Painel de "/" quando NÃO há entry "home" no CMS. Plataforma fechada: visitante sem sessão é
 // redirecionado pro /login e aluno logado pro /academy antes daqui — então isto só é visto pelo
-// admin. Título curto + grade de cursos publicados + atalhos de admin.
+// admin. Nome do site + a vitrine que um plugin ativo contribuir (publicHomeShowcase, hoje a
+// grade de cursos da Academy) + atalhos de admin. Primeira vitrine não-nula vence.
 async function CoursesHome() {
-  const [coursesResult, brand] = await Promise.all([listPublicCourses(), getBrandConfig()]);
-  const courses = coursesResult.success ? coursesResult.data : [];
+  const activePluginKeys = await getActivePluginKeys();
+  const [brand, showcases] = await Promise.all([
+    getBrandConfig(),
+    Promise.all(
+      Object.entries(PLUGIN_CONTRIBUTIONS)
+        .filter(([key]) => activePluginKeys.has(key))
+        .map(([, contributions]) => contributions.publicHomeShowcase?.() ?? null),
+    ),
+  ]);
+  const showcase = showcases.find((value) => value != null) ?? null;
 
   return (
     <div className="space-y-6">
@@ -35,34 +45,12 @@ async function CoursesHome() {
         </Button>
       </div>
 
-      {courses.length === 0 ? (
+      {showcase ?? (
         <EmptyState
           icon={<BookOpen className="size-8" strokeWidth={1.5} />}
           title="Nenhum curso disponível ainda"
           description="Os cursos aparecem aqui assim que forem publicados."
         />
-      ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4 sm:gap-5">
-          {courses.map((course) => (
-            <Link key={course.id} href={`/academy/${course.slug}`} className="group block">
-              <article className="flex h-full flex-col overflow-hidden rounded-panel border border-border bg-card ui-motion-base group-hover:shadow-float">
-                <CourseCover
-                  coverMediaId={course.coverMediaId}
-                  className="w-full rounded-none object-cover ui-motion-emphasis group-hover:scale-105"
-                />
-                <div className="flex flex-1 flex-col gap-1.5 p-4">
-                  <p className="text-[11px] font-medium tracking-caps text-muted-foreground/56 uppercase">
-                    {course.lessonCount} {course.lessonCount === 1 ? "aula" : "aulas"}
-                  </p>
-                  <h2 className="text-base font-semibold text-foreground">{course.title}</h2>
-                  <p className="mt-auto flex items-center gap-1 pt-1 text-sm font-medium text-primary">
-                    Abrir <ArrowRight className="size-3.5" aria-hidden="true" />
-                  </p>
-                </div>
-              </article>
-            </Link>
-          ))}
-        </div>
       )}
 
       <div className="flex flex-wrap gap-2 border-t border-border pt-4">

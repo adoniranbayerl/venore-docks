@@ -18,6 +18,8 @@ const eslintConfig = defineConfig([
     // programaticamente por src/platform/page-builder/cross-plugin-boundary.eslint.test.ts
     // (que passa `ignore: false`). Não são plugins de verdade: fora do PLUGIN_REGISTRY.
     "src/plugins/_fixture-*/**",
+    // Gerado por scripts/gen-plugin-registry.ts (postinstall/predev/prebuild).
+    "src/plugins/*.generated.ts",
   ]),
   {
     files: ["src/**/*.{js,jsx,ts,tsx}"],

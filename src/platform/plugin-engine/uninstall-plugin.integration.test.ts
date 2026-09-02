@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { db } from "@/infrastructure/database/client";
 import { invalidateCache } from "@/infrastructure/cache/memory-cache";
-import { seedUser } from "@/test-support/integration/academy-seed";
+import { seedUser } from "@/test-support/integration/user-seed";
 import { previewPluginUninstall } from "./preview-plugin-uninstall";
 import { performPluginUninstall } from "./uninstall-plugin";
 import { runPluginMigrations } from "./run-plugin-migrations";

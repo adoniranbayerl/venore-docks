@@ -5,3 +5,5 @@
 // seu contributions.ts continua importando só "@venore/plugin-sdk".
 export { BlockRenderer } from "@/components/page-builder/block-renderer";
 export type { BlockRendererComponent, BlockRendererProps, BlockRenderMode } from "@/platform/page-builder/block-renderers";
+// Renderização de rich text (tiptap JSON -> React) que os blocos de plugin usam. Puxa cms + tiptap.
+export * from "@/platform/page-builder/rich-text/render";

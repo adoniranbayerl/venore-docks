@@ -27,22 +27,18 @@ export * from "@/platform/plugin-routing/types";
 // (pra RESOLVER seeds), e um plugin que importa deste entry fecharia ciclo em runtime via o
 // próprio contributions.ts. Um plugin DECLARA `seeds` no contributions.ts; nunca resolve.
 
-// --- platform helpers usados por plugin ---
-export * from "@/platform/brand/get-brand-config";
+// --- platform helpers LEVES usados por plugin ---
+// Só o que é folha (ou quase). O ENTRY RAIZ tem que ser barato de importar: um plugin importa
+// "@venore/plugin-sdk" só pra `OperationResult` ou `db` e não pode pagar o grafo de auth/rbac/
+// themes/media/cms com isso. As superfícies PESADAS foram pra subpaths:
+//   - getPluginAdminPageData / AdminPageGate  -> "@venore/plugin-sdk/admin"  (puxa auth+rbac)
+//   - getBrandConfig / resolveBrandAesthetics -> "@venore/plugin-sdk/brand"  (puxa themes+media+settings)
+//   - renderRichTextContent / hasRichTextContent / RICH_TEXT_INLINE_CLASSES + <BlockRenderer>
+//        -> "@venore/plugin-sdk/page-builder"  (puxa cms + tiptap + block-registry)
+//   - deleteMediaSafely -> "@venore/plugin-sdk/media"  (puxa media-usage-registry -> ciclo)
 export * from "@/platform/breadcrumbs/types";
 export * from "@/platform/breadcrumbs/define-segment";
 export * from "@/platform/media-usage/types";
-// deleteMediaSafely NÃO fica aqui: puxa media-usage-registry -> @/plugins/contributions, o que
-// fecha um ciclo em runtime com o contributions.ts de qualquer plugin que importe deste entry.
-// Vive em "@venore/plugin-sdk/media".
-export * from "@/platform/page-builder/rich-text/render";
-export * from "@/platform/theme-rendering/resolve-brand-aesthetics";
-
-// Gate "de seção" da rota admin de um plugin (getAdminPageData + plugin ativo + OR das permissions
-// da navigation do manifesto). type-only p/ block-renderers: block-renderers.tsx é "server-only",
-// mas `export type` não dispara o guard.
-export { getPluginAdminPageData } from "@/platform/admin-shell/get-plugin-admin-page-data";
-export type { AdminPageGate } from "@/platform/admin-shell/types";
 export type {
   BlockRendererComponent,
   BlockRendererProps,

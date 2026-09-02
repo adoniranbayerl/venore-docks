@@ -26,5 +26,10 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, "src/**/*.integration.test.{ts,tsx}"],
     passWithNoTests: true,
     env: loadEnv("", process.cwd(), ""),
+    // fileParallelism: false (implícito no projeto) + vários plugins sincronizados num único
+    // processo: o PRIMEIRO `await import()` de um módulo que puxa um grafo grande (SDK + contexts)
+    // pode passar de 5s só de transform, sem ser um hang. 20s dá folga sem esconder um travamento
+    // de verdade.
+    testTimeout: 20000,
   },
 });

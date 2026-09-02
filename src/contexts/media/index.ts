@@ -6,6 +6,14 @@ export { uploadMediaAssetHandler as uploadMediaAsset } from "./features/assets/u
 // perfil, sempre privada, sempre < AVATAR_MAX_SIZE_BYTES, sempre na categoria reservada
 // "avatars". Não usar pra biblioteca geral.
 export { uploadAvatarMediaAssetHandler as uploadAvatarMediaAsset } from "./features/assets/upload-avatar-media-asset/handler";
+// Upload do PRÓPRIO arquivo do ator numa categoria reservada nomeada pelo plugin (entregas,
+// anexos...) — sempre private, nunca a biblioteca geral. Genérico: substitui os antigos
+// upload-activity-submission / upload-ticket-attachment que viviam aqui.
+export { uploadReservedCategoryAssetHandler as uploadReservedCategoryAsset } from "./features/assets/upload-reserved-category-asset/handler";
+export type {
+  UploadReservedCategoryAssetInput,
+  UploadReservedCategoryAssetResult,
+} from "./features/assets/upload-reserved-category-asset/types";
 export { listMediaAssetsHandler as listMediaAssets } from "./features/assets/list-media-assets/handler";
 export { getMediaAssetHandler as getMediaAsset } from "./features/assets/get-media-asset/handler";
 // BYPASS deliberado de visibilidade — só pra service que já verificou a própria autorização pro

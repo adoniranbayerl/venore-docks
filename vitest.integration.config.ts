@@ -12,7 +12,7 @@ export default defineConfig({
       // continuam resolvendo pro pacote real. Ver stubs/next-auth.ts.
       {
         find: /^next-auth$/,
-        replacement: fileURLToPath(new URL("./src/test-support/integration/stubs/next-auth.ts", import.meta.url)),
+        replacement: fileURLToPath(new URL("./src/test-support/stubs/next-auth.ts", import.meta.url)),
       },
     ],
   },

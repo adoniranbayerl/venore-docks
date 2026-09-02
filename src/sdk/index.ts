@@ -19,6 +19,7 @@ export { getCache, setCache, invalidateCache, invalidateCacheByPrefix } from "@/
 
 // --- plugin engine / routing ---
 export { isPluginActive } from "@/platform/plugin-engine/is-plugin-active";
+export { importActivePluginBarrel } from "@/platform/plugin-engine/import-plugin-barrel";
 export type { PluginManifest } from "@/platform/plugin-engine/manifest-schema";
 export type { PluginContributions, PluginSeedFn } from "@/platform/plugin-engine/plugin-contributions";
 export * from "@/platform/plugin-routing/types";

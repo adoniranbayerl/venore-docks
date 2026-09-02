@@ -50,6 +50,7 @@ yarn-error.log*
 /src/plugins/contributions.generated.ts
 /src/plugins/contributions.client.generated.ts
 /src/plugins/plugin-keys.generated.ts
+/src/plugins/plugin-barrels.generated.ts
 
 # Cada plugin é um repo próprio, sincronizado por `npm run sync:plugins` para src/plugins/<key>/
 # (opção 3, docs/plugins-repos-separados-plano.md). Nada de plugin é versionado no core — só os

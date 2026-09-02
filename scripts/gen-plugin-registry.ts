@@ -72,11 +72,22 @@ const clientContributionsRegistry =
 // fecharia ciclo com o SDK.
 const pluginKeys = HEADER + `export const PLUGIN_KEYS: string[] = [${keys.map((k) => `"${k}"`).join(", ")}];\n`;
 
+// Mapa key -> loader preguiçoso do barrel público do plugin (só os presentes com index.ts). Usado
+// por importActivePluginBarrel (@venore/plugin-sdk) pra dependência OPCIONAL cross-plugin: um
+// plugin ausente simplesmente não tem entrada, sem `import` fixo pra quebrar o build.
+const barrelKeys = keys.filter((key) => existsSync(path.join(PLUGINS_DIR, key, "index.ts")));
+const pluginBarrels =
+  HEADER +
+  `export const PLUGIN_BARRELS: Record<string, () => Promise<unknown>> = {\n` +
+  barrelKeys.map((key) => `  "${key}": () => import("./${key}"),`).join("\n") +
+  `\n};\n`;
+
 writeFileSync(path.join(PLUGINS_DIR, "registry.generated.ts"), registry);
 writeFileSync(path.join(PLUGINS_DIR, "route-registry.generated.ts"), routeRegistry);
 writeFileSync(path.join(PLUGINS_DIR, "contributions.generated.ts"), contributionsRegistry);
 writeFileSync(path.join(PLUGINS_DIR, "contributions.client.generated.ts"), clientContributionsRegistry);
 writeFileSync(path.join(PLUGINS_DIR, "plugin-keys.generated.ts"), pluginKeys);
+writeFileSync(path.join(PLUGINS_DIR, "plugin-barrels.generated.ts"), pluginBarrels);
 
 console.log(
   `gen-plugin-registry: ${keys.length} plugin(s) [${keys.join(", ")}]; ` +

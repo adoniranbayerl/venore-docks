@@ -256,17 +256,19 @@ nível — o componente que decide como esses quatro se arranjam — que hoje mo
 
 ## Tiers de Shell
 
-Um tema não precisa de uma `Shell` autoral. Há três níveis, do mais barato ao mais completo — os
-oito temas do registro hoje se distribuem pelos três:
+Um tema não precisa de uma `Shell` autoral. Há três níveis, do mais barato ao mais completo (um
+pacote `@venore/theme-*` é self-contained — as peças de folha reaproveitadas ficam bundladas no
+próprio pacote, não há import cruzado entre temas):
 
-1. **Reskin CSS-only** — `index.ts` reexporta a `Shell` (e componentes de slot) de outro tema;
-   o único arquivo próprio é o `theme.css`. Ex.: `venore-frost` reexporta a Shell do
-   `venore-pulse`. É o alvo do `scripts/scaffold-theme.ts` (que reexporta a do `venore-slime`).
-2. **Shell mínima** — `components/Shell.tsx` próprio, compondo os slots de outro tema num arranjo
-   simples. Ex.: `venore-basic`.
+1. **Reskin CSS-only** — `index.ts` reexporta uma `Shell` (bundlada no pacote); o único arquivo
+   próprio é o `theme.css` + o brandmark. Ex.: `@venore/theme-fearless` e `@venore/theme-nite`
+   usam a Shell do antigo `venore-pulse`. É o alvo do `scripts/scaffold-theme.ts` (que parte da
+   Shell do `venore-slime`).
+2. **Shell mínima** — `components/Shell.tsx` próprio, compondo os slots num arranjo simples.
 3. **Shell autoral** — árvore/arranjo próprios, opcionalmente reaproveitando peças de folha
-   puramente comportamentais (mobile-nav store, `PlatformBrand`, `UserMenu`) de outros temas.
-   Ex.: `venore-nightcity`, `aprenda-musica`.
+   puramente comportamentais (mobile-nav store, `PlatformBrand`, `UserMenu`) já bundladas.
+   Ex.: `@venore/theme-{knights,paladins,druids,sorcerers}` (cada vocação com arranjo distinto),
+   `@venore/theme-academy`.
 
 Escolha o tier deliberadamente: comece no 1, suba só quando o arranjo precisar divergir de fato.
 

@@ -203,12 +203,14 @@ logBuffer.push({ message, level });
   de easing, proporção de escala) pode ser declarada em `src/app/globals.css`.** Esse arquivo só
   CONSOME variáveis via `var(...)`; quem define valor é sempre um tema, em
   `src/themes/<tema>/theme.css`, sob os seletores `[data-theme="<tema>"]` /
-  `[data-theme="<tema>"].dark`. Hoje o `THEME_REGISTRY` (`src/themes/registry.ts`) tem 8 temas —
-  `venore-slime`, `venore-basic`, `venore-frost`, `venore-kazordoon`, `venore-nightcity`,
-  `venore-pulse`, `menonita-classic` e `aprenda-musica` — e cada um redeclara o mesmo
-  vocabulário sob o seu próprio `[data-theme="..."]`, nunca por cima de outro tema.
-  `venore-slime` (`src/themes/venore-slime/theme.css`) é a referência: o único com catálogo de
-  paletas salváveis e o fallback imutável (ver abaixo). Isso vale inclusive para o vocabulário
+  `[data-theme="<tema>"].dark`. O `THEME_REGISTRY` (`src/themes/registry.ts`) hoje tem só o
+  `venore-slime` hardcoded (fallback obrigatório, `src/themes/venore-slime/`); todo tema extra é
+  um pacote `@venore/theme-*` descoberto a partir das deps do `package.json`
+  (`scripts/gen-theme-registry.ts` → `registry.generated.ts` + `theme-imports.generated.css`,
+  ambos gitignored). Cada tema redeclara o mesmo vocabulário sob o seu próprio
+  `[data-theme="..."]`, nunca por cima de outro. `venore-slime` (`src/themes/venore-slime/theme.css`)
+  é a referência: o único com o vocabulário completo garantido e o fallback imutável (ver abaixo).
+  Ver `docs/themes/temas-como-pacotes-plano.md`. Isso vale inclusive para o vocabulário
   shadcn (`--background`, `--primary`, etc.) e para os multiplicadores de escala usados em
   `calc()` (ex: `--ui-radius-scale-lg: 2`, `--ui-button-padding-scale-xs: 0.5`) — o número da
   proporção é decisão de design tanto quanto a cor.

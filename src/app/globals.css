@@ -4,21 +4,12 @@
    aqui, no único stylesheet global carregado pelo RootLayout, e não via import direto num layout
    ou componente, por dois motivos: (1) passa pelo mesmo pipeline PostCSS/Tailwind deste arquivo
    (mesmas transformações, mesmo bundle), e (2) mantém ordem de CSS determinística — Next.js só
-   garante ordem estável quando os imports de CSS ficam contidos num único ponto de entrada; com
-   imports espalhados por layouts a ordem pode variar entre dev e build. Como o tema ativo troca
-   em runtime (sem rebuild), o CSS de todo tema instalado precisa estar no bundle sempre; qual
-   bloco vale é decidido pelo atributo data-theme no <html> (RootLayout), não por qual import
-   rodou — então não há custo em enviar os N temas instalados de uma vez. Instalar um tema novo é
-   uma linha nova aqui, no mesmo espírito do registro estático em src/themes/registry.ts. */
+   garante ordem estável quando os imports de CSS ficam contidos num único ponto de entrada.
+   Como o tema ativo troca em runtime (sem rebuild), o CSS de todo tema instalado precisa estar no
+   bundle sempre; qual bloco vale é decidido pelo atributo data-theme no <html> (RootLayout).
+   `venore-slime` é o único hardcoded (fallback obrigatório); o resto vem do @import gerado abaixo
+   (pacotes @venore/theme-* — scripts/gen-theme-registry.ts, a partir das deps do package.json). */
 @import "../themes/venore-slime/theme.css";
-@import "../themes/venore-basic/theme.css";
-@import "../themes/venore-nightcity/theme.css";
-@import "../themes/venore-kazordoon/theme.css";
-@import "../themes/venore-pulse/theme.css";
-@import "../themes/venore-frost/theme.css";
-@import "../themes/menonita-classic/theme.css";
-/* Temas instalados como pacote @venore/theme-* — lista gerada por scripts/gen-theme-registry.ts
-   a partir das deps do package.json (vazio se nenhum instalado). */
 @import "../themes/theme-imports.generated.css";
 
 /* tw-animate-css: os primitivos stock (dialog, select) usam animate-in/fade-in-0/zoom-in-95/

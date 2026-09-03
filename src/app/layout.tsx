@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker-registrar";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { ThemeDomSync } from "@/components/theme-dom-sync";
 import { getBrandConfig } from "@/platform/brand/get-brand-config";
 import { resolveActiveTheme } from "@/platform/theme-rendering/resolve-active-theme";
 import { resolveActiveColorPalette, buildColorPaletteOverrideCss } from "@/platform/theme-rendering/resolve-active-color-palette";
@@ -76,6 +77,7 @@ export default async function RootLayout({
             root layout do App Router (mesmo padrão de ChartStyle, src/components/ui/chart.tsx). */}
         {paletteOverrideCss && <style id="color-palette-override" dangerouslySetInnerHTML={{ __html: paletteOverrideCss }} />}
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem forcedTheme={forcedColorMode}>
+          <ThemeDomSync themeKey={manifest.key} />
           {children}
           <Toaster />
           <ServiceWorkerRegistrar />

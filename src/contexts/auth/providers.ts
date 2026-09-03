@@ -39,12 +39,24 @@ function isDevelopmentCredentialsEnabled(): boolean {
 }
 
 function isCredentialsDisabled(): boolean {
-  // Opt-out: o login por senha/usuário (provider Credentials) fica LIGADO por padrão — é o
-  // comportamento de sempre, e setOwnPassword/adminSetUserPassword dependem dele. Com
-  // AUTH_DISABLE_CREDENTIALS="true" (exato, mesmo critério do flag de dev) o provider não é
-  // registrado e o formulário de senha some da página de login. Só desative quando houver OAuth
-  // configurado — senão ninguém consegue entrar.
+  // Kill-switch explícito: AUTH_DISABLE_CREDENTIALS="true" (exato) sempre vence e remove o provider
+  // Credentials, mesmo que AUTH_ENABLE_CREDENTIALS esteja setado.
   return readEnvValue("AUTH_DISABLE_CREDENTIALS") === "true";
+}
+
+function isCredentialsExplicitlyEnabled(): boolean {
+  // Opt-in, mesmo esquema do OAuth: a env existe (="true" exato) -> provider ligado.
+  return readEnvValue("AUTH_ENABLE_CREDENTIALS") === "true";
+}
+
+// O provider Credentials (login por senha) fica ligado quando: AUTH_ENABLE_CREDENTIALS="true"
+// (opt-in explícito) OU nenhum provider OAuth está configurado (rede de segurança — o /setup e
+// setOwnPassword/adminSetUserPassword dependem dele, e um deploy novo não pode ficar sem forma de
+// entrar). AUTH_DISABLE_CREDENTIALS="true" sempre desliga.
+function isCredentialsEnabled(activeOAuthProviderCount: number): boolean {
+  if (isCredentialsDisabled()) return false;
+  if (isCredentialsExplicitlyEnabled()) return true;
+  return activeOAuthProviderCount === 0;
 }
 
 function readGithubCredentials(): { clientId: string; clientSecret: string } | null {
@@ -102,8 +114,16 @@ export function buildAuthProviders() {
     );
   }
 
-  if (isCredentialsDisabled()) {
+  const oauthProviderCount = providers.length;
+  if (!isCredentialsEnabled(oauthProviderCount)) {
     return providers;
+  }
+  if (!isCredentialsExplicitlyEnabled() && !isCredentialsDisabled() && oauthProviderCount === 0) {
+    console.warn(
+      '[auth] Nenhum provider OAuth configurado e AUTH_ENABLE_CREDENTIALS não definido — o login ' +
+        'por senha foi ligado automaticamente pra não trancar o acesso. Defina ' +
+        'AUTH_ENABLE_CREDENTIALS="true" pra torná-lo explícito, ou configure um provider OAuth.',
+    );
   }
 
   providers.push(
@@ -142,23 +162,27 @@ export function buildAuthProviders() {
 }
 
 export function listAvailableAuthProviders(): AuthProviderDescriptor[] {
+  const github = readGithubCredentials();
+  const google = readGoogleCredentials();
+  const microsoft = readMicrosoftCredentials();
+  const oauthProviderCount = [github, google, microsoft].filter((entry) => entry !== null).length;
   return [
-    { key: "github", label: "GitHub", kind: "oauth", enabled: readGithubCredentials() !== null },
+    { key: "github", label: "GitHub", kind: "oauth", enabled: github !== null },
     {
       key: "google",
       label: "Google",
       kind: "oauth",
-      enabled: readGoogleCredentials() !== null,
+      enabled: google !== null,
       iconUrl: "/providers/google.svg",
     },
     {
       key: "microsoft-entra-id",
       label: "Microsoft",
       kind: "oauth",
-      enabled: readMicrosoftCredentials() !== null,
+      enabled: microsoft !== null,
       iconUrl: "/providers/microsoft.svg",
     },
-    { key: "credentials", label: "Senha", kind: "password", enabled: !isCredentialsDisabled() },
+    { key: "credentials", label: "Senha", kind: "password", enabled: isCredentialsEnabled(oauthProviderCount) },
   ];
 }
 
@@ -166,6 +190,8 @@ export {
   hasRequiredProviderEnv,
   hasRequiredProviderEnvAliases,
   isCredentialsDisabled,
+  isCredentialsEnabled,
+  isCredentialsExplicitlyEnabled,
   isDevelopmentCredentialsEnabled,
   readEnvValue,
   readFirstEnvValue,

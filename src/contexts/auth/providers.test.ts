@@ -18,6 +18,7 @@ const ENV_KEYS = [
   "AUTH_LOGIN_PASSWORD",
   "AUTH_ENABLE_DEV_CREDENTIALS",
   "AUTH_DISABLE_CREDENTIALS",
+  "AUTH_ENABLE_CREDENTIALS",
 ];
 
 function clearAuthEnv() {
@@ -120,30 +121,81 @@ describe("providers env helpers", () => {
     process.env.AUTH_DISABLE_CREDENTIALS = '"true"';
     expect(isCredentialsDisabled()).toBe(true);
   });
+
+  it("isCredentialsExplicitlyEnabled requires the exact flag value \"true\"", async () => {
+    const { isCredentialsExplicitlyEnabled } = await import("./providers");
+
+    expect(isCredentialsExplicitlyEnabled()).toBe(false);
+
+    process.env.AUTH_ENABLE_CREDENTIALS = "1";
+    expect(isCredentialsExplicitlyEnabled()).toBe(false);
+
+    process.env.AUTH_ENABLE_CREDENTIALS = '"true"';
+    expect(isCredentialsExplicitlyEnabled()).toBe(true);
+  });
+
+  it("isCredentialsEnabled: opt-in flag, or safety net when no OAuth is configured", async () => {
+    const { isCredentialsEnabled } = await import("./providers");
+
+    // rede de segurança: sem OAuth -> ligado
+    expect(isCredentialsEnabled(0)).toBe(true);
+    // com OAuth e sem flag -> desligado (mesmo esquema do OAuth: precisa opt-in)
+    expect(isCredentialsEnabled(1)).toBe(false);
+
+    process.env.AUTH_ENABLE_CREDENTIALS = "true";
+    expect(isCredentialsEnabled(1)).toBe(true);
+    expect(isCredentialsEnabled(0)).toBe(true);
+
+    // kill-switch sempre vence
+    process.env.AUTH_DISABLE_CREDENTIALS = "true";
+    expect(isCredentialsEnabled(0)).toBe(false);
+    expect(isCredentialsEnabled(1)).toBe(false);
+  });
 });
 
 describe("buildAuthProviders", () => {
   beforeEach(() => {
     clearAuthEnv();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
     clearAuthEnv();
+    vi.restoreAllMocks();
   });
 
-  it("returns an empty array when no provider env vars are set", async () => {
+  it("rede de segurança: sem nenhum provider configurado, o Credentials liga sozinho (e avisa)", async () => {
     const { buildAuthProviders } = await import("./providers");
     expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["credentials"]);
+    expect(console.warn).toHaveBeenCalledOnce();
   });
 
-  it("includes only the providers with complete env vars", async () => {
+  it("com OAuth configurado e sem AUTH_ENABLE_CREDENTIALS, o Credentials NÃO entra", async () => {
     process.env.GOOGLE_ID = "id";
     process.env.GOOGLE_SECRET = "secret";
 
     const { buildAuthProviders } = await import("./providers");
-    const providers = buildAuthProviders();
+    expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["google"]);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
 
-    expect(providers.map((provider) => provider.id)).toEqual(["google", "credentials"]);
+  it("AUTH_ENABLE_CREDENTIALS=\"true\" liga o Credentials junto com o OAuth (sem aviso)", async () => {
+    process.env.GOOGLE_ID = "id";
+    process.env.GOOGLE_SECRET = "secret";
+    process.env.AUTH_ENABLE_CREDENTIALS = "true";
+
+    const { buildAuthProviders } = await import("./providers");
+    expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["google", "credentials"]);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it("AUTH_ENABLE_CREDENTIALS que não é exatamente \"true\" não liga (com OAuth presente)", async () => {
+    process.env.GOOGLE_ID = "id";
+    process.env.GOOGLE_SECRET = "secret";
+    process.env.AUTH_ENABLE_CREDENTIALS = "1";
+
+    const { buildAuthProviders } = await import("./providers");
+    expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["google"]);
   });
 
   it("supports the AUTH_ prefixed Google alias", async () => {
@@ -151,12 +203,10 @@ describe("buildAuthProviders", () => {
     process.env.AUTH_GOOGLE_SECRET = "secret";
 
     const { buildAuthProviders } = await import("./providers");
-    const providers = buildAuthProviders();
-
-    expect(providers.map((provider) => provider.id)).toEqual(["google", "credentials"]);
+    expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["google"]);
   });
 
-  it("builds github, google and microsoft together, plus dev credentials when enabled", async () => {
+  it("builds github, google and microsoft together; Credentials só com AUTH_ENABLE_CREDENTIALS", async () => {
     process.env.GITHUB_ID = "gh-id";
     process.env.GITHUB_SECRET = "gh-secret";
     process.env.GOOGLE_ID = "g-id";
@@ -164,26 +214,15 @@ describe("buildAuthProviders", () => {
     process.env.MICROSOFT_ID = "m-id";
     process.env.MICROSOFT_SECRET = "m-secret";
     process.env.MICROSOFT_ISSUER = "m-issuer";
-    process.env.AUTH_ENABLE_DEV_CREDENTIALS = "true";
 
     const { buildAuthProviders } = await import("./providers");
-    const providers = buildAuthProviders();
+    expect(buildAuthProviders().map((p) => p.id)).toEqual(["github", "google", "microsoft-entra-id"]);
 
-    expect(providers.map((p) => p.id)).toEqual(["github", "google", "microsoft-entra-id", "credentials"]);
+    process.env.AUTH_ENABLE_CREDENTIALS = "true";
+    expect(buildAuthProviders().map((p) => p.id)).toEqual(["github", "google", "microsoft-entra-id", "credentials"]);
   });
 
-  it("adds password credentials when the env pair is present", async () => {
-    process.env.AUTH_CREDENTIALS_USERNAME = "operator";
-    process.env.AUTH_CREDENTIALS_PASSWORD = "secret";
-
-    const { buildAuthProviders } = await import("./providers");
-    const providers = buildAuthProviders();
-
-    expect(providers).toHaveLength(1);
-    expect(providers[0].id).toBe("credentials");
-  });
-
-  it("omits microsoft when the issuer is missing", async () => {
+  it("omits microsoft when the issuer is missing (e cai na rede de segurança)", async () => {
     process.env.MICROSOFT_ID = "m-id";
     process.env.MICROSOFT_SECRET = "m-secret";
 
@@ -191,34 +230,22 @@ describe("buildAuthProviders", () => {
     expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["credentials"]);
   });
 
-  it("omits dev credentials when the flag is not exactly \"true\"", async () => {
-    process.env.AUTH_ENABLE_DEV_CREDENTIALS = "1";
-
-    const { buildAuthProviders } = await import("./providers");
-    expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["credentials"]);
-  });
-
-  it("omits the credentials provider when AUTH_DISABLE_CREDENTIALS is \"true\"", async () => {
+  it("omits the credentials provider when AUTH_DISABLE_CREDENTIALS is \"true\" (mesmo com AUTH_ENABLE_CREDENTIALS)", async () => {
+    process.env.AUTH_ENABLE_CREDENTIALS = "true";
     process.env.AUTH_DISABLE_CREDENTIALS = "true";
 
     const { buildAuthProviders } = await import("./providers");
     expect(buildAuthProviders()).toEqual([]);
   });
 
-  it("keeps OAuth providers but drops credentials when disabled", async () => {
+  it("keeps OAuth providers but drops credentials when AUTH_DISABLE_CREDENTIALS wins", async () => {
     process.env.GOOGLE_ID = "id";
     process.env.GOOGLE_SECRET = "secret";
+    process.env.AUTH_ENABLE_CREDENTIALS = "true";
     process.env.AUTH_DISABLE_CREDENTIALS = "true";
 
     const { buildAuthProviders } = await import("./providers");
     expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["google"]);
-  });
-
-  it("still includes credentials when AUTH_DISABLE_CREDENTIALS is not exactly \"true\"", async () => {
-    process.env.AUTH_DISABLE_CREDENTIALS = "1";
-
-    const { buildAuthProviders } = await import("./providers");
-    expect(buildAuthProviders().map((provider) => provider.id)).toEqual(["credentials"]);
   });
 });
 
@@ -248,12 +275,22 @@ describe("listAvailableAuthProviders", () => {
     ]);
   });
 
-  it("reflects the same detection state as buildAuthProviders", async () => {
+  it("com OAuth configurado e sem AUTH_ENABLE_CREDENTIALS, marca credentials como disabled", async () => {
     process.env.GITHUB_ID = "gh-id";
     process.env.GITHUB_SECRET = "gh-secret";
-    process.env.AUTH_CREDENTIALS_USERNAME = "operator";
-    process.env.AUTH_CREDENTIALS_PASSWORD = "secret";
-    process.env.AUTH_ENABLE_DEV_CREDENTIALS = "true";
+
+    const { listAvailableAuthProviders } = await import("./providers");
+    const descriptors = listAvailableAuthProviders();
+
+    expect(descriptors.find((d) => d.key === "github")?.enabled).toBe(true);
+    expect(descriptors.find((d) => d.key === "google")?.enabled).toBe(false);
+    expect(descriptors.find((d) => d.key === "credentials")?.enabled).toBe(false);
+  });
+
+  it("reflects the same detection state as buildAuthProviders com AUTH_ENABLE_CREDENTIALS", async () => {
+    process.env.GITHUB_ID = "gh-id";
+    process.env.GITHUB_SECRET = "gh-secret";
+    process.env.AUTH_ENABLE_CREDENTIALS = "true";
 
     const { listAvailableAuthProviders } = await import("./providers");
     const descriptors = listAvailableAuthProviders();

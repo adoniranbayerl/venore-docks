@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { getSettingsPageData } from "@/platform/admin-shell/get-settings-page-data";
 import { listThemeStates } from "@/platform/theme-engine/list-theme-states";
@@ -54,7 +55,7 @@ export default async function ThemesAdminPage() {
         <h1 className="text-xl font-semibold text-foreground">Aparência</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Escolha o tema visual usado no site, ajuste o comportamento do header e as cores, entre os temas
-          instalados e habilitados.
+          instalados e habilitados. <Link href="/admin/themes/preview" className="text-primary underline">Ver amostra dos temas</Link>.
         </p>
       </div>
 

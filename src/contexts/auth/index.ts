@@ -39,6 +39,16 @@ export type { FindUserByEmailQuery, FindUserByEmailResult, FoundUser } from "./f
 export { listUsersHandler as listUsers } from "./features/identity/list-users/handler";
 export type { UserRef, ListUsersResult } from "./features/identity/list-users/types";
 
+// Registro por senha (provider Credentials): cria auth.users com senha pra um visitante anônimo.
+// O ponto de composição (src/platform/registration/handle-user-registered.ts) decide superadmin
+// inicial vs. pending logo depois — mesmo fluxo do evento createUser do Auth.js pro OAuth.
+export { registerWithPasswordHandler as registerWithPassword } from "./features/registration/register-with-password/handler";
+export type {
+  RegisterWithPasswordInput,
+  RegisterWithPasswordResult,
+  RegisteredUser,
+} from "./features/registration/register-with-password/types";
+
 // Primitivos do fluxo de registro (docs/venore-docks.md — Autenticação / Fluxo de registro).
 // Sem verificação de autorização própria — quem autoriza é o handler de rbac que compõe com
 // eles (contexts/rbac/features/registration-approval/*), via este barrel (regra 10).

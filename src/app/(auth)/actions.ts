@@ -2,8 +2,9 @@
 
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
-import { getCurrentUser, signIn, signOut } from "@/contexts/auth";
+import { getCurrentUser, registerWithPassword, signIn, signOut } from "@/contexts/auth";
 import { grantSuperadmin, superadminExists } from "@/contexts/rbac";
+import { handleUserRegistered } from "@/platform/registration/handle-user-registered";
 
 export async function signInWithProviderAction(formData: FormData) {
   const provider = String(formData.get("provider") ?? "");
@@ -28,15 +29,36 @@ export async function signInWithPasswordAction(formData: FormData) {
   redirect("/post-login");
 }
 
-export async function signInWithDevCredentialsAction(formData: FormData) {
-  const username = String(formData.get("username") ?? "");
+// Registro por senha (provider Credentials). Cria o usuário e roda a mesma composição que o
+// evento `createUser` do Auth.js roda pro OAuth (handle-user-registered): primeiro usuário do
+// sistema vira superadmin; os demais nascem "pending" e dependem de aprovação do superadmin —
+// por isso não há confirmação por email aqui (pedido do dono: quem autoriza é o superadmin).
+export async function signUpWithPasswordAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "");
+  const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
+  const registered = await registerWithPassword({ name, email, password });
+  if (!registered.success) {
+    redirect(`/login?error=${encodeURIComponent(registered.error.message)}`);
+  }
+
+  const composed = await handleUserRegistered({
+    id: registered.data.id,
+    email: registered.data.email,
+    name: registered.data.name,
+  });
+  if (!composed.success) {
+    redirect(`/login?error=${encodeURIComponent(composed.error.message)}`);
+  }
+
+  // Entra já se o registro virou superadmin inicial (status "approved"); se ficou "pending", o
+  // provider Credentials recusa (providers.ts) — cai no catch e mostra o aviso de aprovação.
   try {
-    await signIn("credentials", { username, password, redirect: false });
+    await signIn("credentials", { username: email, password, redirect: false });
   } catch (error) {
     if (error instanceof AuthError) {
-      redirect("/login?error=invalid-credentials");
+      redirect("/login?notice=registration-pending");
     }
     throw error;
   }

@@ -87,14 +87,11 @@ jobs:
 
       - run: npm ci
 
-      - name: Migrate (core + plugins com schema)
-        run: |
-          npm run db:migrate
-          npm run db:migrate:academy
-          npm run db:migrate:birthdays
-          npm run db:migrate:broadcast
-          npm run db:migrate:company-metrics
-          npm run db:migrate:helpdesk
+      - name: Migrate (core)
+        # Migrations de plugin rodam no install (platform/plugin-engine/run-plugin-migrations.ts),
+        # não têm mais script npm próprio. O smoke só bate em rotas de core (/, /login, /setup,
+        # /cursos, /academy, /api/auth/providers), então o schema de core basta pra subir o app.
+        run: npm run db:migrate
 
       - name: Build
         run: npm run build

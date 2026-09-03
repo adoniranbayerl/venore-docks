@@ -44,8 +44,8 @@ describe("HeaderSlot — máquina de estados de scroll", () => {
 
     expect(html).toContain("bg-card");
     expect(html).toContain("border-header-border-subtle");
-    expect(html).toContain("h-16");
-    expect(html).toContain("lg:h-20");
+    expect(html).toContain("h-20");
+    expect(html).toContain("lg:h-24");
   });
 
   it("com stickyEnabled, o header top já fica levemente fosco (backdrop-blur)", () => {
@@ -58,7 +58,7 @@ describe("HeaderSlot — máquina de estados de scroll", () => {
   it("carrega no mesmo markup as classes do estado 'scrolled' (eleva: frosted + sombra + encolhe), prontas pra ativar via CSS quando data-scrolled virar true", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
 
-    expect(html).toContain("data-[scrolled=true]:h-14");
+    expect(html).toContain("data-[scrolled=true]:h-16");
     expect(html).toContain("data-[scrolled=true]:bg-card/85");
     expect(html).toContain("data-[scrolled=true]:backdrop-blur-xl");
     expect(html).toContain("data-[scrolled=true]:border-border");
@@ -108,7 +108,7 @@ describe("HeaderSlot — máquina de estados de scroll", () => {
   it("T4: com scrollShrinkEnabled=false, não monta HeaderScrollSentinel nem carrega as classes data-[scrolled=true]", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} scrollShrinkEnabled={false} />);
 
-    expect(html).not.toContain("data-[scrolled=true]:h-14");
+    expect(html).not.toContain("data-[scrolled=true]:h-16");
     expect(html).not.toContain("h-0 w-0 overflow-visible");
   });
 });

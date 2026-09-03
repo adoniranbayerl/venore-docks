@@ -40,8 +40,8 @@ export function PlatformBrand({
   return (
     <span
       className={
-        "block h-[calc(var(--ui-control-height-lg)*(var(--brand-size-pct)/100))] " +
-        "md:h-[calc(var(--ui-control-height-lg)*1.6*(var(--brand-size-pct)/100))] " +
+        "block h-[calc(var(--ui-control-height-lg)*0.92*(var(--brand-size-pct)/100))] " +
+        "md:h-[calc(var(--ui-control-height-lg)*1.32*(var(--brand-size-pct)/100))] " +
         originClass +
         ` ${baseTransform} group-data-[scrolled=true]/header:transform-[scale(var(--brand-scale-scrolled))] group-data-[scrolled=false]/header:transform-[scale(var(--brand-scale-top))] ` +
         "ui-motion-emphasis"

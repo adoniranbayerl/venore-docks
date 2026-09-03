@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 const subscribeNever = () => () => {};
@@ -26,7 +27,12 @@ export function ColorModeToggle({ className }: { className?: string }) {
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <button type="button" className={className} onClick={() => setTheme(isDark ? "light" : "dark")}>
+    <button
+      type="button"
+      className={"inline-flex items-center gap-2 " + (className ?? "")}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+    >
+      {isDark ? <Sun className="size-4 shrink-0" aria-hidden="true" /> : <Moon className="size-4 shrink-0" aria-hidden="true" />}
       {isDark ? "Modo claro" : "Modo escuro"}
     </button>
   );

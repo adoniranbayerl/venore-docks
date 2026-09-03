@@ -43,10 +43,10 @@ export function HeaderSlot({
         id="site-header"
         data-scrolled="false"
         className={
-          "group/header z-40 flex h-16 items-center justify-between gap-4 border-b border-header-border-subtle bg-card px-4 text-foreground ui-motion-emphasis sm:px-6 lg:h-20 " +
+          "group/header z-40 flex h-20 items-center justify-between gap-4 border-b border-header-border-subtle bg-card px-4 text-foreground ui-motion-emphasis sm:px-6 lg:h-24 " +
           (stickyEnabled ? "sticky top-0 backdrop-blur-sm " : "") +
           (scrollShrinkEnabled
-            ? "data-[scrolled=true]:h-14 data-[scrolled=true]:border-border data-[scrolled=true]:bg-card/85 data-[scrolled=true]:shadow-header data-[scrolled=true]:backdrop-blur-xl "
+            ? "data-[scrolled=true]:h-16 data-[scrolled=true]:border-border data-[scrolled=true]:bg-card/85 data-[scrolled=true]:shadow-header data-[scrolled=true]:backdrop-blur-xl "
             : "") +
           (brand.position === "center" ? "relative" : "")
         }
@@ -57,7 +57,7 @@ export function HeaderSlot({
             href="/"
             aria-label={brand.name}
             className={
-              "inline-flex items-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring " +
+              "inline-flex items-center rounded-lg py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring " +
               (brand.position === "center" ? "absolute left-1/2 -translate-x-1/2" : "")
             }
           >

@@ -26,8 +26,8 @@ export function Breadcrumbs({
 
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mx-auto w-full max-w-6xl px-6 pt-4">
-        <ol className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+      <nav aria-label="Breadcrumb" className="mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6 lg:px-8">
+        <ol className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           {breadcrumbs.map((item, index) => {
             const isFirst = index === 0;
             const isLast = index === breadcrumbs.length - 1;
@@ -38,13 +38,16 @@ export function Breadcrumbs({
                 key={item.key}
                 className={`items-center gap-1 ${isCollapsedOnMobile ? "hidden sm:flex" : "flex"}`}
               >
-                {!isFirst && <ChevronRight aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground/56" />}
+                {!isFirst && <ChevronRight aria-hidden="true" className="size-3 shrink-0 text-muted-foreground/56" />}
                 {item.current ? (
                   <span aria-current="page" className="font-medium text-foreground">
                     {item.label}
                   </span>
                 ) : item.href ? (
-                  <Link href={item.href} className="transition-colors hover:text-foreground hover:underline">
+                  <Link
+                    href={item.href}
+                    className="rounded-sm px-1 py-0.5 ui-motion-base outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     {item.label}
                   </Link>
                 ) : (
@@ -54,7 +57,7 @@ export function Breadcrumbs({
                     substitui os itens reais na árvore de acessibilidade, só o espaço deles. */}
                 {isFirst && hasCollapsibleMiddle && (
                   <span aria-hidden="true" className="flex items-center gap-1 sm:hidden">
-                    <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/56" />
+                    <ChevronRight className="size-3 shrink-0 text-muted-foreground/56" />
                     <span>…</span>
                   </span>
                 )}

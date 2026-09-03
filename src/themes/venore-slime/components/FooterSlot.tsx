@@ -11,8 +11,8 @@ import { PlatformBrand } from "./PlatformBrand";
 // getMenuByLocation("sitemap")) é platform/theme-rendering/resolve-theme-slot-props.ts.
 export function FooterSlot({ brand, sitemapItems, creditsEnabled }: FooterSlotProps) {
   return (
-    <footer className="mt-auto grid gap-8 border-t border-border px-4 py-10 text-muted-foreground sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:px-8">
-      <div className="w-fit max-w-full justify-self-start space-y-5 rounded-panel bg-accent/14 px-5 py-6">
+    <footer className="mt-auto grid gap-8 border-t border-border px-4 py-12 text-muted-foreground sm:px-6 lg:grid-cols-[max-content_minmax(0,1fr)] lg:gap-12 lg:px-8">
+      <div className="w-fit max-w-full justify-self-start space-y-5 rounded-panel border border-border bg-accent/14 px-6 py-6">
         <div>
           <div className="max-w-40 origin-left scale-125">
             <PlatformBrand
@@ -26,7 +26,7 @@ export function FooterSlot({ brand, sitemapItems, creditsEnabled }: FooterSlotPr
               isScrolled={false}
             />
           </div>
-          <span aria-hidden className="mt-4 block h-0.5 w-10 rounded-full bg-primary/30" />
+          <span aria-hidden className="mt-4 block h-0.5 w-10 rounded-full bg-primary/40" />
         </div>
         {brand.description.trim().length > 0 && (
           <p className="max-w-[34ch] text-pretty text-xs leading-6 text-muted-foreground">{brand.description}</p>

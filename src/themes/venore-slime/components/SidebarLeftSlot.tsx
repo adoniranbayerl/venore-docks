@@ -73,7 +73,7 @@ export function SidebarLeftSlot({
           onClick={handleToggleCollapsed}
           aria-expanded={!collapsed}
           aria-label={collapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
-          className="flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-float ui-motion-base outline-none hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-panel ui-motion-base outline-none hover:bg-muted hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring"
         >
           {collapsed ? (
             <ChevronRight className="size-4" aria-hidden="true" />
@@ -161,7 +161,7 @@ function SidebarSurfaceSwitch({
         <button
           type="submit"
           aria-label={label}
-          className="group/sidebar-collapse-target relative flex size-11 items-center justify-center rounded-xl border border-border bg-muted text-foreground shadow-float ui-motion-base outline-none hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring"
+          className="group/sidebar-collapse-target relative flex size-11 items-center justify-center rounded-xl border border-border bg-muted text-foreground shadow-panel ui-motion-base outline-none hover:border-ring active:border-ring focus-visible:ring-2 focus-visible:ring-ring"
         >
           {isAdmin ? <ShieldCheck className="size-4" aria-hidden="true" /> : <Globe2 className="size-4" aria-hidden="true" />}
           <span className={cn("max-w-0 overflow-hidden whitespace-nowrap opacity-0", SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES)}>
@@ -181,7 +181,7 @@ function SidebarSurfaceSwitch({
       <span
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-y-1 z-0 w-[calc(50%-0.125rem)] rounded-lg border border-ring bg-card shadow-float ui-motion-base",
+          "pointer-events-none absolute inset-y-1 z-0 w-[calc(50%-0.125rem)] rounded-lg border border-ring bg-card shadow-panel ui-motion-base",
           isAdmin ? "left-[calc(50%+0.125rem)]" : "left-1",
         )}
       />

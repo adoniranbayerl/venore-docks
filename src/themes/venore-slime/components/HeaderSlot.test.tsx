@@ -3,20 +3,21 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { HeaderSlot } from "./HeaderSlot";
 import type { HeaderSlotProps } from "@/contexts/themes/contracts/types";
 
-// HeaderSlot é um server component puro (sem I/O) — dá pra renderizar com renderToStaticMarkup
-// sem jsdom/testing-library (nenhum dos dois está instalado; vitest.config.ts roda em
-// `environment: "node"`). O header reativo ao scroll (docs/ui/shell-spec.md §2) não guarda mais
-// `isScrolled` como prop/estado React: os dois estados ("top"/"scrolled") coexistem sempre no
-// mesmo markup, um só alterna via `data-scrolled` no <header> (escrito em runtime por
-// HeaderScrollSentinel) e seletores CSS `data-[scrolled=true]:`/`group-data-[scrolled=true]/
-// header:`. Por isso "cobrir os dois estados" aqui significa: um único render prova que as classes
-// de AMBOS os estados estão presentes (senão o segundo estado nunca apareceria em tela nenhuma).
+// HeaderSlot é server component puro (sem I/O) — renderToStaticMarkup sem jsdom/testing-library
+// (nenhum instalado; vitest roda em environment "node"). O header reativo ao scroll não guarda
+// `isScrolled` como prop/estado React: os dois estados ("top"/"scrolled") coexistem no mesmo
+// markup, alternados por `data-scrolled` no <header> (escrito por HeaderScrollSentinel) via
+// seletores CSS `data-[scrolled=true]:`. "Cobrir os dois estados" = um render prova que as
+// classes de AMBOS estão presentes.
+//
+// Refator premium: o estado "scrolled" ELEVA o header (frosted + sombra + encolhe), não inverte
+// a paleta pra bg-primary. Sem mais classes `group-data-[scrolled=true]/header:...primary...`.
 const baseProps: HeaderSlotProps = {
   brand: {
     name: "Venore Docks",
     mode: "svg",
     size: 100,
-    scrolledSize: 80,
+    scrolledSize: 90,
     position: "left",
     logoUrl: "/brand/brand-logo.svg",
     scrolledLogoUrl: "/brand/brand-logo-scrolled.png",
@@ -38,41 +39,54 @@ describe("HeaderSlot — máquina de estados de scroll", () => {
     expect(html).toContain('data-scrolled="false"');
   });
 
-  it("carrega no markup as classes do estado 'top' (bg/border/altura neutros)", () => {
+  it("carrega no markup as classes do estado 'top' (bg-card, borda hairline, altura base)", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
 
     expect(html).toContain("bg-card");
     expect(html).toContain("border-header-border-subtle");
-    expect(html).toContain("md:h-24");
-    expect(html).toContain("lg:h-28");
+    expect(html).toContain("h-16");
+    expect(html).toContain("lg:h-20");
   });
 
-  it("carrega no mesmo markup as classes do estado 'scrolled' (inversão pra bg-primary), prontas pra ativar via CSS quando data-scrolled virar true", () => {
+  it("com stickyEnabled, o header top já fica levemente fosco (backdrop-blur)", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
 
-    expect(html).toContain("data-[scrolled=true]:bg-primary");
-    expect(html).toContain("data-[scrolled=true]:text-primary-foreground");
-    expect(html).toContain("data-[scrolled=true]:border-primary");
-    expect(html).toContain("data-[scrolled=true]:shadow-header");
-    expect(html).toContain("data-[scrolled=true]:h-16");
+    expect(html).toContain("sticky");
+    expect(html).toContain("backdrop-blur-sm");
   });
 
-  it("renderiza a sentinela de scroll (HeaderScrollSentinel) sem reservar espaço no fluxo (zero layout shift)", () => {
+  it("carrega no mesmo markup as classes do estado 'scrolled' (eleva: frosted + sombra + encolhe), prontas pra ativar via CSS quando data-scrolled virar true", () => {
+    const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
+
+    expect(html).toContain("data-[scrolled=true]:h-14");
+    expect(html).toContain("data-[scrolled=true]:bg-card/85");
+    expect(html).toContain("data-[scrolled=true]:backdrop-blur-xl");
+    expect(html).toContain("data-[scrolled=true]:border-border");
+    expect(html).toContain("data-[scrolled=true]:shadow-header");
+  });
+
+  it("NÃO inverte a paleta no scroll (sem bg-primary / text-primary-foreground no header)", () => {
+    const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
+
+    expect(html).not.toContain("data-[scrolled=true]:bg-primary");
+    expect(html).not.toContain("group-data-[scrolled=true]/header:text-primary-foreground");
+  });
+
+  it("renderiza a sentinela de scroll sem reservar espaço no fluxo (zero layout shift)", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
 
     expect(html).toContain("aria-hidden");
     expect(html).toContain("h-0");
   });
 
-  it("nav e login link carregam as duas variantes de cor (padrão + group-data scrolled)", () => {
+  it("sem usuário, mostra o link 'Entrar'", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} />);
 
     expect(html).toContain("text-muted-foreground");
-    expect(html).toContain("group-data-[scrolled=true]/header:text-primary-foreground");
     expect(html).toContain("Entrar");
   });
 
-  it("com usuário logado, troca login link por UserMenu (também reage via group-data, sem prop isScrolled)", () => {
+  it("com usuário logado, troca o link 'Entrar' pelo UserMenu", () => {
     const html = renderToStaticMarkup(
       <HeaderSlot
         {...baseProps}
@@ -82,19 +96,19 @@ describe("HeaderSlot — máquina de estados de scroll", () => {
 
     expect(html).not.toContain("Entrar");
     expect(html).toContain("Ada Lovelace");
-    expect(html).toContain("group-data-[scrolled=true]/header:hover:bg-primary-foreground/10");
   });
 
-  it("T4: com stickyEnabled=false, não aplica sticky/top-0", () => {
+  it("T4: com stickyEnabled=false, não aplica sticky/top-0 nem backdrop-blur no estado top", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} stickyEnabled={false} />);
 
     expect(html).not.toContain("sticky");
+    expect(html).not.toContain("backdrop-blur-sm");
   });
 
   it("T4: com scrollShrinkEnabled=false, não monta HeaderScrollSentinel nem carrega as classes data-[scrolled=true]", () => {
     const html = renderToStaticMarkup(<HeaderSlot {...baseProps} scrollShrinkEnabled={false} />);
 
-    expect(html).not.toContain("data-[scrolled=true]:bg-primary");
+    expect(html).not.toContain("data-[scrolled=true]:h-14");
     expect(html).not.toContain("h-0 w-0 overflow-visible");
   });
 });

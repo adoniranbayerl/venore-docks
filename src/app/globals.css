@@ -17,7 +17,9 @@
 @import "../themes/venore-pulse/theme.css";
 @import "../themes/venore-frost/theme.css";
 @import "../themes/menonita-classic/theme.css";
-@import "../themes/aprenda-musica/theme.css";
+/* Temas instalados como pacote @venore/theme-* — lista gerada por scripts/gen-theme-registry.ts
+   a partir das deps do package.json (vazio se nenhum instalado). */
+@import "../themes/theme-imports.generated.css";
 
 /* tw-animate-css: os primitivos stock (dialog, select) usam animate-in/fade-in-0/zoom-in-95/
    slide-in-from-* — sem esse import essas classes não geram CSS nenhum (ficam inertes) e os

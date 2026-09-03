@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { THEME_REGISTRY } from "./registry";
@@ -37,7 +37,11 @@ describe("contrato de tokens de tema", () => {
     expect(darkContract.length).toBeGreaterThan(20);
   });
 
-  for (const key of Object.keys(THEME_REGISTRY)) {
+  // Só os temas que vivem em src/themes/<key>/ — os instalados como pacote @venore/theme-*
+  // (theme.css em node_modules) são cobertos pelo CI do próprio repo do tema.
+  const inRepoKeys = Object.keys(THEME_REGISTRY).filter((key) => existsSync(join(THEMES_DIR, key, "theme.css")));
+
+  for (const key of inRepoKeys) {
     describe(key, () => {
       const css = readThemeCss(key);
       const base = extractRuleBody(css, `[data-theme="${key}"]`);

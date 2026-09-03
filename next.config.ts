@@ -5,12 +5,14 @@ import type { NextConfig } from "next";
 // como TypeScript cru — o Next transpila via transpilePackages. Lista derivada das dependencies,
 // sem nome de plugin hard-coded.
 const hostPkg = createRequire(import.meta.url)("./package.json") as { dependencies?: Record<string, string> };
-const pluginPackages = Object.keys(hostPkg.dependencies ?? {}).filter(
-  (dep) => dep.startsWith("@venore/plugin-") && dep !== "@venore/plugin-sdk",
+// Pacotes @venore/* (plugin e tema) são TS cru — o Next transpila. Os *-sdk são alias de tsconfig,
+// não pacote, então ficam de fora.
+const venorePackages = Object.keys(hostPkg.dependencies ?? {}).filter(
+  (dep) => dep.startsWith("@venore/") && !dep.endsWith("-sdk"),
 );
 
 const nextConfig: NextConfig = {
-  transpilePackages: pluginPackages,
+  transpilePackages: venorePackages,
   allowedDevOrigins: ["192.168.6.8"],
   experimental: {
     serverActions: {

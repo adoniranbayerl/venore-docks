@@ -21,7 +21,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@venore/plugin-sdk": ["./src/sdk/index.ts"],
-      "@venore/plugin-sdk/*": ["./src/sdk/*.ts"]
+      "@venore/plugin-sdk/*": ["./src/sdk/*.ts"],
+      "@venore/theme-sdk": ["./src/theme-sdk/index.ts"],
+      "@venore/theme-sdk/*": ["./src/theme-sdk/*.ts"]
     }
   },
   "include": [

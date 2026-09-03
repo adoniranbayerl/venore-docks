@@ -9,6 +9,8 @@ export default defineConfig({
     alias: [
       { find: /^@venore\/plugin-sdk$/, replacement: fileURLToPath(new URL("./src/sdk/index.ts", import.meta.url)) },
       { find: /^@venore\/plugin-sdk\/(.*)$/, replacement: fileURLToPath(new URL("./src/sdk/", import.meta.url)) + "$1.ts" },
+      { find: /^@venore\/theme-sdk$/, replacement: fileURLToPath(new URL("./src/theme-sdk/index.ts", import.meta.url)) },
+      { find: /^@venore\/theme-sdk\/(.*)$/, replacement: fileURLToPath(new URL("./src/theme-sdk/", import.meta.url)) + "$1.ts" },
       // "@venore/plugin-sdk" reexporta getPluginAdminPageData -> @/contexts/auth -> auth.config.ts
       // (NextAuth({...}) no top-level) -> next-auth -> "next/server", subpath que não resolve fora
       // do bundler do Next. Qualquer teste UNITÁRIO de plugin que importa o barrel do SDK esbarra

@@ -102,6 +102,10 @@
 
   /* Superfície "apresentação" — telão/projetor/slide, sempre a versão escura deste tema,
      independente do light/dark ativo (ver racional completo em venore-slime/theme.css). */
+  /* Texto/borda sobre imagem com véu escuro (ex: capa de curso na Academy) — claro
+     independente de light/dark, por isso só no bloco base. Ver venore-slime/theme.css. */
+  --overlay-foreground: oklch(1 0 0);
+
   --presentation-ground: oklch(0.16 0 0);
   --presentation-card: oklch(0.21 0 0);
   --presentation-border: oklch(0.4 0 0);

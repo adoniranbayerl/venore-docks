@@ -20,7 +20,8 @@
 // Bump para "4.0.0": `scrollState` foi REMOVIDO de HeaderSlotProps (docs/ui/shell-spec.md §2,
 // implementação do header reativo ao scroll). Mesmo raciocínio do bump para "3.0.0": scroll é
 // estado de runtime só do client, não algo resolvível em request/render do servidor — o valor que
-// vinha por prop estava hardcoded em `false` (mock-data.ts) porque não havia outra fonte possível.
+// vinha por prop estava hardcoded em `false` (no mock de slot do Slime, à época) porque não havia
+// outra fonte possível.
 // Detecção passa a viver inteiramente em HeaderScrollSentinel (IntersectionObserver, único client
 // component novo), que escreve `data-scrolled` direto no <header> via DOM; o resto do header reage
 // via seletor CSS (`data-[scrolled=true]` / `group-data-[scrolled=true]/header`), sem prop nem

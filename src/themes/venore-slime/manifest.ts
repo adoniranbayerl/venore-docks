@@ -9,4 +9,7 @@ export const venoreSlimeManifest: ThemeManifest = {
   // contexts/settings antes da migração — preserva o visual atual até alguém customizar por tema.
   brandAesthetics: { mode: "svg", size: 100, scrolledSize: 80, position: "left", color: "#143b52" },
   colorModes: ["light", "dark"],
+  // O HeaderSlot deste tema lê stickyEnabled/scrollShrinkEnabled — /admin/themes mostra o
+  // formulário de comportamento de header só quando este tema está ativo.
+  capabilities: { headerBehavior: true },
 };

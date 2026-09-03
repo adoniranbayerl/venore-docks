@@ -8,7 +8,7 @@ import { collectNotificationAlert } from "@/platform/notifications/notification-
 import { collectUserNavItems } from "@/platform/user-nav/registry";
 import { resolveBrandAesthetics } from "./resolve-brand-aesthetics";
 import { toSitemapItems } from "./to-sitemap-items";
-import { venoreSlimeMockProps } from "@/themes/venore-slime/mock-data";
+import { FALLBACK_MAIN_NAV_ITEMS, THEME_SLOT_DEFAULTS } from "./slot-defaults";
 import type { HeaderSlotProps, HeaderUserInfo, FooterSlotProps, SidebarLeftSlotProps, NavMode, MainNavItem, NavGroup } from "@/contexts/themes";
 
 // item "label" (href null, contexts/cms/contracts/types.ts — MenuItemTarget) é o agregador: só
@@ -33,8 +33,10 @@ function toMainNavItems(items: ResolvedMenuItem[]): MainNavItem[] {
 // + platform/admin-shell), passados pelo layout e mesclados no SidebarLeft (main-nav/admin-nav não
 // vivem no Header). O dado de usuário do Header (user/canAccessAdmin/onSignOut) segue o mesmo
 // princípio: resolvido aqui a partir de @/contexts/auth, nunca dentro do próprio tema. main-nav
-// agora vem de contexts/cms (menu "main") em vez do mock; se a leitura falhar, caímos de volta no
-// mock fixo em venoreSlimeMockProps.sidebarLeft.navItems para nunca deixar a sidebar vazia.
+// agora vem de contexts/cms (menu "main"); se a leitura falhar, cai em FALLBACK_MAIN_NAV_ITEMS
+// (slot-defaults.ts) pra nunca deixar a sidebar vazia. Os valores de slot sem fonte real
+// (userbarEnabled, headerNavItems, footer.creditsEnabled, sidebarLeft.enabled) vêm de
+// THEME_SLOT_DEFAULTS — constantes de plataforma, não mais o mock do tema Slime espalhado.
 // header.brand e footer.brand: conteúdo (nome/logos) vem de contexts/settings (getBrandConfig,
 // sobrevive a troca de tema); estética (mode/size/scrolledSize/position/color) vem do tema ativo
 // (resolveBrandAesthetics — T2, docs/implementation-roadmap.md Fase 5), não é mais mock nem
@@ -95,13 +97,11 @@ export async function resolveThemeSlotProps(sidebarNav: {
     user ? collectNotificationAlert() : Promise.resolve(null),
     user ? collectUserNavItems() : Promise.resolve([]),
   ]);
-  const mainNavItems: MainNavItem[] = mainMenu.success ? toMainNavItems(mainMenu.data) : venoreSlimeMockProps.sidebarLeft.navItems;
+  const mainNavItems: MainNavItem[] = mainMenu.success ? toMainNavItems(mainMenu.data) : FALLBACK_MAIN_NAV_ITEMS;
   const sitemapItems = sitemapMenu.success ? toSitemapItems(sitemapMenu.data) : [];
 
   return {
-    ...venoreSlimeMockProps,
     header: {
-      ...venoreSlimeMockProps.header,
       brand: {
         name: brandConfig.siteName,
         mode: aesthetics.mode,
@@ -111,8 +111,10 @@ export async function resolveThemeSlotProps(sidebarNav: {
         logoUrl: brandConfig.logoUrl,
         scrolledLogoUrl: brandConfig.scrolledLogoUrl,
       },
+      userbarEnabled: THEME_SLOT_DEFAULTS.userbarEnabled,
       stickyEnabled: headerBehavior.sticky,
       scrollShrinkEnabled: headerBehavior.scrollShrink,
+      headerNavItems: [...THEME_SLOT_DEFAULTS.headerNavItems],
       user,
       canAccessAdmin: sidebarNav.canAccessAdmin,
       onSignOut: sidebarNav.onSignOut,
@@ -120,7 +122,6 @@ export async function resolveThemeSlotProps(sidebarNav: {
       userNavItems,
     },
     footer: {
-      ...venoreSlimeMockProps.footer,
       brand: {
         name: brandConfig.siteName,
         mode: aesthetics.mode,
@@ -133,9 +134,10 @@ export async function resolveThemeSlotProps(sidebarNav: {
         description: brandConfig.footerDescription,
       },
       sitemapItems,
+      creditsEnabled: THEME_SLOT_DEFAULTS.footerCreditsEnabled,
     },
     sidebarLeft: {
-      enabled: venoreSlimeMockProps.sidebarLeft.enabled,
+      enabled: THEME_SLOT_DEFAULTS.sidebarLeftEnabled,
       navMode: sidebarNav.navMode,
       navItems: sidebarNav.navMode === "admin" ? [] : mainNavItems,
       navGroups: sidebarNav.navMode === "admin" ? sidebarNav.adminNavGroups : [],

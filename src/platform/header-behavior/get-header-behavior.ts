@@ -43,8 +43,6 @@ export async function getHeaderBehavior(): Promise<HeaderBehavior> {
 
 export { KEYS as HEADER_BEHAVIOR_SETTING_KEYS };
 
-// Pedido desta sessão: opção de tema só aparece pro tema que de fato a usa — hoje só o HeaderSlot
-// do Venore Slime lê stickyEnabled/scrollShrinkEnabled de HeaderSlotProps (os outros temas
-// recebem os campos, por serem aditivos ao contrato, mas ignoram). /admin/themes usa esta lista
-// pra decidir se mostra o formulário pro tema ativo no momento, em vez de exibi-lo sempre.
-export const HEADER_BEHAVIOR_SUPPORTED_THEME_KEYS = ["venore-slime"] as const;
+// Quais temas de fato respeitam stickyEnabled/scrollShrinkEnabled agora vem de
+// manifest.capabilities.headerBehavior (contexts/themes) — /admin/themes deriva direto do
+// manifesto do tema ativo, sem uma lista de theme keys aqui.

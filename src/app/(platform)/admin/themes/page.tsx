@@ -3,7 +3,7 @@ import { getSettingsPageData } from "@/platform/admin-shell/get-settings-page-da
 import { listThemeStates } from "@/platform/theme-engine/list-theme-states";
 import { listColorPaletteStates } from "@/platform/theme-engine/list-color-palette-states";
 import { CUSTOM_COLOR_PALETTE_ID } from "@/platform/theme-engine/custom-color-palette";
-import { getHeaderBehavior, HEADER_BEHAVIOR_SUPPORTED_THEME_KEYS } from "@/platform/header-behavior/get-header-behavior";
+import { getHeaderBehavior } from "@/platform/header-behavior/get-header-behavior";
 import { ActivateThemeButton } from "./_components/activate-theme-button";
 import { ToggleThemeControl } from "./_components/toggle-theme-control";
 import { ActivateColorPaletteButton } from "./_components/activate-color-palette-button";
@@ -29,9 +29,7 @@ export default async function ThemesAdminPage() {
   ]);
   const customPalette = colorPaletteStates.palettes.find((palette) => palette.id === CUSTOM_COLOR_PALETTE_ID);
   const activeTheme = themes.find((theme) => theme.isActive);
-  const activeThemeSupportsHeaderBehavior = activeTheme
-    ? (HEADER_BEHAVIOR_SUPPORTED_THEME_KEYS as readonly string[]).includes(activeTheme.manifest.key)
-    : false;
+  const activeThemeSupportsHeaderBehavior = activeTheme?.manifest.capabilities?.headerBehavior ?? false;
 
   return (
     <div className="space-y-8">

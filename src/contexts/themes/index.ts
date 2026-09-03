@@ -14,6 +14,7 @@ export { themesBreadcrumbSegments } from "./breadcrumbs";
 export type {
   ThemeManifest,
   ThemeColorMode,
+  ThemeCapabilities,
   BrandAesthetics,
   ActiveThemeState,
   BreadcrumbItem,

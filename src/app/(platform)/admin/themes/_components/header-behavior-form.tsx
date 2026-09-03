@@ -8,10 +8,9 @@ import { updateHeaderBehaviorAction, type ThemesActionState } from "../actions";
 
 const initialState: ThemesActionState = { error: null };
 
-// T4 (docs/implementation-roadmap.md — Fase 5): hoje só respeitado pelo HeaderSlot do Venore
-// Slime — page.tsx (HEADER_BEHAVIOR_SUPPORTED_THEME_KEYS) só renderiza este form quando o tema
-// ativo é um dos que de fato aplicam essas opções (pedido desta sessão: "opções do tema só devem
-// aparecer para o seu respectivo tema"), então não precisa mais de um aviso condicional aqui.
+// T4 (docs/implementation-roadmap.md — Fase 5): page.tsx só renderiza este form quando o tema
+// ativo declara manifest.capabilities.headerBehavior (hoje só o Venore Slime), então não precisa
+// de aviso condicional aqui — "opções do tema só aparecem pro seu respectivo tema".
 export function HeaderBehaviorForm({ behavior }: { behavior: HeaderBehavior }) {
   const [state, formAction, pending] = useActionState(updateHeaderBehaviorAction, initialState);
   useActionToast({ pending, error: state.error, successMessage: "Comportamento do header salvo." });

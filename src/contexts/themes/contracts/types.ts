@@ -20,6 +20,17 @@ export type BrandAesthetics = {
 // há "outro" modo pra alternar). `["light", "dark"]` = tema bimodal, comportamento atual.
 export type ThemeColorMode = "light" | "dark";
 
+// Capacidades OPCIONAIS que um tema declara suportar — usadas por platform/ pra decidir se um
+// controle de admin faz sentido pro tema ativo, em vez de uma lista hardcoded de theme keys.
+// Ausente/false = o tema recebe os campos correspondentes de *SlotProps (são aditivos ao
+// contrato) mas os ignora.
+export type ThemeCapabilities = {
+  // O HeaderSlot do tema lê e respeita stickyEnabled/scrollShrinkEnabled de HeaderSlotProps.
+  // /admin/themes só mostra o formulário de comportamento de header quando o tema ativo declara
+  // isto. Hoje só o venore-slime.
+  headerBehavior?: boolean;
+};
+
 export type ThemeManifest = {
   key: string; // kebab-case, único, estável — mesmo padrão de PluginManifest.key
   name: string;
@@ -29,6 +40,7 @@ export type ThemeManifest = {
   // Extensão aditiva do contrato (campo novo, nada removido) — mesmo critério dos campos aditivos
   // de HeaderSlotProps, sem bump de themeContractVersion. Ordem não importa; não-vazio.
   colorModes: readonly ThemeColorMode[];
+  capabilities?: ThemeCapabilities;
 };
 
 export type ActiveThemeState = {

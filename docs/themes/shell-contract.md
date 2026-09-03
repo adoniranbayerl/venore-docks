@@ -1,8 +1,15 @@
-# Contrato de shell — proposta (Fase 1, só leitura + especificação)
+# Contrato de shell
 
-`Objetivo da sessão`: trocar o tema ativo deve trocar a shell (layout estrutural), não só cor/
-tipografia/token. Hoje isso não é totalmente verdade — ver seção 1. Este documento não altera
-código. É a proposta de contrato a decidir antes de qualquer implementação (Fase 2).
+> **STATUS: Abordagem A implementada.** `themeContractVersion` está em `6.0.0`
+> (`src/contexts/themes/contracts/contract-version.ts`): cada tema exporta um `Shell` único, dono
+> da árvore/arranjo entre Header/Footer/SidebarLeft/Content, e `src/app/(platform)/layout.tsx` só
+> resolve dados e repassa. As seções 2–4 abaixo eram a comparação de abordagens que levou a essa
+> decisão; a seção 5 é o que foi feito. A regra de lint da recomendação 5.6 também está no ar
+> (`from: theme` não importa `context` nenhum além de `contexts/themes/contracts/**` — categoria
+> `theme-contract` em `eslint.config.mjs`). Ver "Tiers de Shell" no fim.
+
+`Objetivo original`: trocar o tema ativo deve trocar a shell (layout estrutural), não só cor/
+tipografia/token — ver seção 1 pro gap que motivou a mudança.
 
 Fontes lidas: `docs/venore-docks.md` ("Sobre temas", "Contrato de slot", regras de boundary),
 `docs/ui/shell-spec.md`, `src/contexts/themes/contracts/types.ts`, `contract-version.ts`,
@@ -247,7 +254,31 @@ nível — o componente que decide como esses quatro se arranjam — que hoje mo
 
 ---
 
-## Decisão pendente
+## Tiers de Shell
 
-Aguardando aprovação de qual abordagem seguir antes de qualquer implementação (Fase 2). Recomendo
-A pelos motivos acima.
+Um tema não precisa de uma `Shell` autoral. Há três níveis, do mais barato ao mais completo — os
+oito temas do registro hoje se distribuem pelos três:
+
+1. **Reskin CSS-only** — `index.ts` reexporta a `Shell` (e componentes de slot) de outro tema;
+   o único arquivo próprio é o `theme.css`. Ex.: `venore-frost` reexporta a Shell do
+   `venore-pulse`. É o alvo do `scripts/scaffold-theme.ts` (que reexporta a do `venore-slime`).
+2. **Shell mínima** — `components/Shell.tsx` próprio, compondo os slots de outro tema num arranjo
+   simples. Ex.: `venore-basic`.
+3. **Shell autoral** — árvore/arranjo próprios, opcionalmente reaproveitando peças de folha
+   puramente comportamentais (mobile-nav store, `PlatformBrand`, `UserMenu`) de outros temas.
+   Ex.: `venore-nightcity`, `aprenda-musica`.
+
+Escolha o tier deliberadamente: comece no 1, suba só quando o arranjo precisar divergir de fato.
+
+### Scaffold
+
+```
+npx tsx scripts/scaffold-theme.ts <chave-kebab> "Nome de Exibição"
+```
+
+Cria `src/themes/<chave>/` no tier 1 (`theme.css` = cópia do `venore-slime` com o seletor
+`[data-theme]` trocado, garantindo o vocabulário completo de tokens que
+`theme-token-contract.test.ts` exige), `manifest.ts` com TODOs, `color-palettes.ts` via
+`generateHueRotationPalettes`, e já registra o `@import` no `globals.css` e a entrada no
+`registry.ts`. Depois: recolorir o `theme.css` (só valores, nunca remover token), ajustar
+`brandAesthetics`/`capabilities`, e rodar `typecheck`/`lint`/`vitest run src/themes`.

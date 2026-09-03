@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
-import type { MainNavItem, NavGroup } from "@/contexts/themes";
+import type { MainNavItem, NavGroup } from "@/contexts/themes/contracts/types";
 import { cn } from "@/lib/utils";
 
 // Aba de navegação horizontal — sublinhado ativo em âmbar, não pill de fundo (padrão de tab

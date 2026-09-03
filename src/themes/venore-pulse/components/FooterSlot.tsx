@@ -1,5 +1,5 @@
 import { Sitemap } from "@/components/sitemap";
-import type { FooterSlotProps } from "@/contexts/themes";
+import type { FooterSlotProps } from "@/contexts/themes/contracts/types";
 
 // Faixa full-width calma, sem painel de marca em destaque (Slime) nem ponto neon/glow (Nightcity)
 // — brand.color não é consumido aqui, decisão de design deste tema (o contrato só exige aceitar

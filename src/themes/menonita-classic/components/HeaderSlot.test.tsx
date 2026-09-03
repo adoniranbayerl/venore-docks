@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { HeaderSlot } from "./HeaderSlot";
-import type { HeaderSlotProps } from "@/contexts/themes";
+import type { HeaderSlotProps } from "@/contexts/themes/contracts/types";
 
 // HeaderSlot é um server component puro (sem I/O) — dá pra renderizar com renderToStaticMarkup
 // sem jsdom/testing-library (nenhum dos dois está instalado; vitest.config.ts roda em

@@ -1,4 +1,4 @@
-import type { ThemeManifest } from "@/contexts/themes";
+import type { ThemeManifest } from "@/contexts/themes/contracts/types";
 
 // Segundo tema, mínimo e deliberadamente feio — só existe para provar que trocar o tema ativo
 // troca a shell (docs/themes/shell-contract.md, Fase 2). Não é um tema "de produto".

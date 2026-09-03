@@ -1,4 +1,4 @@
-import type { ContentSlotProps } from "@/contexts/themes";
+import type { ContentSlotProps } from "@/contexts/themes/contracts/types";
 import { Breadcrumbs } from "./Breadcrumbs";
 
 // bg-background sólido — sem `bg-(image:--app-background)` como Slime/Nightcity, porque este

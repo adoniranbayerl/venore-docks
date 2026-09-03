@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
-import type { MainNavItem } from "@/contexts/themes";
+import type { MainNavItem } from "@/contexts/themes/contracts/types";
 import { cn } from "@/lib/utils";
 import { NavIcon } from "@/platform/nav-icons/NavIcon";
 

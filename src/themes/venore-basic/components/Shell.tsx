@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ThemeShellProps, MainNavItem, NavGroup, SitemapItem } from "@/contexts/themes";
+import type { ThemeShellProps, MainNavItem, NavGroup, SitemapItem } from "@/contexts/themes/contracts/types";
 
 // Prova de que o arranjo estrutural é decisão do tema, não da aplicação
 // (docs/themes/shell-contract.md — Abordagem A): mesma forma de dado que venore-slime recebe

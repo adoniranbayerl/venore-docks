@@ -1,4 +1,4 @@
-import type { SidebarLeftSlotProps } from "@/contexts/themes";
+import type { SidebarLeftSlotProps } from "@/contexts/themes/contracts/types";
 import { AdminNavSwitch } from "./AdminNavSwitch";
 import { NavGroupTab, NavTab } from "./NavTab";
 

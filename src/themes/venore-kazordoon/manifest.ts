@@ -1,4 +1,4 @@
-import type { ThemeManifest } from "@/contexts/themes";
+import type { ThemeManifest } from "@/contexts/themes/contracts/types";
 
 export const venoreKazordoonManifest: ThemeManifest = {
   key: "venore-kazordoon",

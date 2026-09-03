@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { BreadcrumbItem } from "@/contexts/themes";
+import type { BreadcrumbItem } from "@/contexts/themes/contracts/types";
 
 // Trilha minimalista com separador "·" — nem chevron (Slime/Nightcity), nem "/" (Kazordoon).
 // Puramente apresentacional, mesmo contrato de slot que os outros três já seguem.

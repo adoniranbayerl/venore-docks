@@ -1,4 +1,4 @@
-import type { ContentSlotProps } from "@/contexts/themes";
+import type { ContentSlotProps } from "@/contexts/themes/contracts/types";
 import { Breadcrumbs } from "../../venore-slime/components/Breadcrumbs";
 
 // Breadcrumbs é o mesmo componente do Venore Slime, reaproveitado como está: puramente

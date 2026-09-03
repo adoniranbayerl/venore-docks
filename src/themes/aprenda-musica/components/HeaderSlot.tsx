@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { HeaderSlotProps } from "@/contexts/themes";
+import type { HeaderSlotProps } from "@/contexts/themes/contracts/types";
 import { cn } from "@/lib/utils";
 import { MobileNavToggleButton } from "../../venore-slime/components/MobileNavToggleButton";
 import { UserMenu } from "../../venore-slime/components/UserMenu";

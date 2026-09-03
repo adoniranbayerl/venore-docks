@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { HeaderSlotProps } from "@/contexts/themes";
+import type { HeaderSlotProps } from "@/contexts/themes/contracts/types";
 import { UserMenu } from "./UserMenu";
 import { MobileNavToggleButton } from "./MobileNavToggleButton";
 import { PlatformBrand } from "./PlatformBrand";

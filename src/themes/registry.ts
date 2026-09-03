@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { ColorPalette, ThemeManifest, ThemeShellProps } from "@/contexts/themes";
+import type { ColorPalette, ThemeManifest, ThemeShellProps } from "@/contexts/themes/contracts/types";
 import * as venoreSlime from "./venore-slime";
 import * as venoreBasic from "./venore-basic";
 import * as venoreNightcity from "./venore-nightcity";

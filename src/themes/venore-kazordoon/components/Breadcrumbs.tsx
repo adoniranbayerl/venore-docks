@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { BreadcrumbItem } from "@/contexts/themes";
+import type { BreadcrumbItem } from "@/contexts/themes/contracts/types";
 
 // Trilha minimalista com separador "/" (não chevron, não ponto neon) — o mais discreto dos três
 // temas de propósito (pedido: "clean, sem exagero"). Puramente apresentacional, mesmo contrato de

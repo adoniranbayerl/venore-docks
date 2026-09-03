@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import type { NavGroup, SidebarLeftSlotProps } from "@/contexts/themes";
+import type { NavGroup, SidebarLeftSlotProps } from "@/contexts/themes/contracts/types";
 import { cn } from "@/lib/utils";
 import { MobileNavDrawer } from "../../venore-slime/components/MobileNavDrawer";
 import { SidebarNavLink } from "../../venore-slime/components/SidebarNavLink";

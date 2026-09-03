@@ -41,6 +41,11 @@ const eslintConfig = defineConfig([
         { type: "component", pattern: "src/components", partialMatch: false },
       ],
       "boundaries/files": [
+        // O contrato de slot (contexts/themes/contracts/**) é a ÚNICA superfície de context que
+        // um tema pode importar — categoria própria, antes da regra genérica de context-public,
+        // pra a policy "theme -> context" abaixo poder barrar barrel/contracts de qualquer OUTRO
+        // context sem barrar o contrato de tema (só tipos). Ver docs/themes/shell-contract.md §5.6.
+        { pattern: "src/contexts/themes/contracts/**", category: "theme-contract", exclusive: true },
         { pattern: "src/contexts/*/index.ts", category: "context-public", exclusive: true },
         { pattern: "src/contexts/*/contracts/**", category: "context-public", exclusive: true },
         { pattern: "src/contexts/*/**", category: "context-internal" },
@@ -59,7 +64,7 @@ const eslintConfig = defineConfig([
           default: "allow",
           policies: [
             {
-              from: { element: { type: ["plugin", "theme"] } },
+              from: { element: { type: "plugin" } },
               disallow: {
                 to: {
                   element: { type: "context" },
@@ -67,7 +72,24 @@ const eslintConfig = defineConfig([
                 },
               },
               message:
-                "Um plugin/tema só pode importar de contexts/<nome>/index.ts (barrel público) ou contexts/<nome>/contracts/** — nunca de arquivos internos do context (store, service fora do barrel, schema, etc).",
+                "Um plugin só pode importar de contexts/<nome>/index.ts (barrel público) ou contexts/<nome>/contracts/** — nunca de arquivos internos do context (store, service fora do barrel, schema, etc).",
+            },
+            {
+              // Tema é MAIS restrito que plugin: nem barrel público de context ele importa. A
+              // única superfície permitida é o contrato de slot (categoria "theme-contract",
+              // contexts/themes/contracts/**, só tipos). Com a Abordagem A o Shell tem muita
+              // árvore de JSX própria (docs/themes/shell-contract.md) — a regra "o tema nunca
+              // busca dado sozinho, só recebe por prop" precisa de trava mecânica, não só de
+              // convenção. platform/theme-rendering é o único lugar que resolve dado pro tema.
+              from: { element: { type: "theme" } },
+              disallow: {
+                to: {
+                  element: { type: "context" },
+                  file: { categories: ["context-internal", "context-public"] },
+                },
+              },
+              message:
+                "Um tema só pode importar o contrato de slot (src/contexts/themes/contracts/**) — nunca um barrel público nem arquivo interno de context. O tema recebe todo dado por prop do Shell, resolvido em platform/theme-rendering (docs/venore-docks.md — Contrato de slot).",
             },
             {
               // Um plugin importa de OUTRO plugin só pelo barrel público (index.ts) ou

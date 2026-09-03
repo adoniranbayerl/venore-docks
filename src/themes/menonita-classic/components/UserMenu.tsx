@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import type { HeaderUserInfo, NavItem } from "@/contexts/themes";
+import type { HeaderUserInfo, NavItem } from "@/contexts/themes/contracts/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ColorModeToggle } from "@/components/color-mode-toggle";
 

@@ -1,4 +1,4 @@
-import type { ThemeShellProps } from "@/contexts/themes";
+import type { ThemeShellProps } from "@/contexts/themes/contracts/types";
 import { ContentSlot } from "./ContentSlot";
 import { FooterSlot } from "./FooterSlot";
 import { HeaderSlot } from "./HeaderSlot";

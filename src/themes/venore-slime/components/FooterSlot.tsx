@@ -1,5 +1,5 @@
 import { Sitemap } from "@/components/sitemap";
-import type { FooterSlotProps } from "@/contexts/themes";
+import type { FooterSlotProps } from "@/contexts/themes/contracts/types";
 import { PlatformBrand } from "./PlatformBrand";
 
 // Marca num painel accent-soft + grid de sitemap real (Sitemap, componente reutilizável fora do

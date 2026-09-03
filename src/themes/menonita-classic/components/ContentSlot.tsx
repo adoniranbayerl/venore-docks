@@ -1,4 +1,4 @@
-import type { ContentSlotProps } from "@/contexts/themes";
+import type { ContentSlotProps } from "@/contexts/themes/contracts/types";
 import { Breadcrumbs } from "./Breadcrumbs";
 
 export function ContentSlot({

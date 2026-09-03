@@ -1,4 +1,4 @@
-import type { HeaderSlotProps, FooterSlotProps, SidebarLeftSlotProps, NavItem } from "@/contexts/themes";
+import type { HeaderSlotProps, FooterSlotProps, SidebarLeftSlotProps, NavItem } from "@/contexts/themes/contracts/types";
 
 // Dado mockado do tema Venore Slime — não existe CMS nem RBAC de navegação ainda para resolver
 // brand/navItems/sitemap de verdade (docs/venore-docks.md — "Sobre temas", ponto 6).

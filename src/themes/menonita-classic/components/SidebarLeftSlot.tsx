@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, Globe2, ShieldCheck } from "lucide-react";
-import type { SidebarLeftSlotProps } from "@/contexts/themes";
+import type { SidebarLeftSlotProps } from "@/contexts/themes/contracts/types";
 import { cn } from "@/lib/utils";
 import { MobileNavDrawer } from "./MobileNavDrawer";
 import { SidebarNavLink } from "./SidebarNavLink";

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import type { BreadcrumbItem } from "@/contexts/themes";
+import type { BreadcrumbItem } from "@/contexts/themes/contracts/types";
 
 // Faixa de rota estilo HUD — barra fina com fundo levemente destacado e um ponto neon à esquerda,
 // em vez da lista solta e sem chrome do Breadcrumbs do Venore Slime. Puramente apresentacional,

@@ -1,5 +1,5 @@
 import { Sitemap } from "@/components/sitemap";
-import type { FooterSlotProps } from "@/contexts/themes";
+import type { FooterSlotProps } from "@/contexts/themes/contracts/types";
 import { BrandMark } from "./BrandMark";
 
 // Faixa plana, sem painel de marca em destaque (Venore Slime usava bg-accent/14 + escala 125% na

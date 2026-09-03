@@ -1,5 +1,5 @@
 import { Sitemap } from "@/components/sitemap";
-import type { FooterSlotProps } from "@/contexts/themes";
+import type { FooterSlotProps } from "@/contexts/themes/contracts/types";
 
 // Faixa plana, sem painel de marca em destaque (Slime) nem ponto neon/glow (Nightcity) — só
 // borda superior de 1px e texto, o mais discreto dos três footers de propósito. brand.color não é

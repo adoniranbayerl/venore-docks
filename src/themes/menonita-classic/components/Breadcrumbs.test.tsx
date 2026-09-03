@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Breadcrumbs } from "./Breadcrumbs";
-import type { BreadcrumbItem } from "@/contexts/themes";
+import type { BreadcrumbItem } from "@/contexts/themes/contracts/types";
 
 const deepTrail: BreadcrumbItem[] = [
   { key: "home", label: "Início", href: "/", current: false },

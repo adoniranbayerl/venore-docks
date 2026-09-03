@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import type { BreadcrumbItem } from "@/contexts/themes";
+import type { BreadcrumbItem } from "@/contexts/themes/contracts/types";
 
 // Puramente apresentacional — recebe a trilha e o JSON-LD já resolvidos no servidor
 // (platform/breadcrumbs/resolve-breadcrumbs.ts) e só renderiza; nunca busca rota/entidade sozinho

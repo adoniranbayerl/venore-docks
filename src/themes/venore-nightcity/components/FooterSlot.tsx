@@ -1,5 +1,5 @@
 import { Sitemap } from "@/components/sitemap";
-import type { FooterSlotProps } from "@/contexts/themes";
+import type { FooterSlotProps } from "@/contexts/themes/contracts/types";
 
 // Faixa fina, não o bloco alto com painel de marca em destaque do Venore Slime — a identidade
 // visual deste tema já mora inteira na Sidebar (rail) e no Header, então o rodapé só precisa

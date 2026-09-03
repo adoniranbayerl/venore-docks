@@ -1,6 +1,6 @@
 import semver from "semver";
 import { describe, expect, it } from "vitest";
-import { SUPPORTED_THEME_CONTRACT_RANGE } from "@/contexts/themes";
+import { SUPPORTED_THEME_CONTRACT_RANGE } from "@/contexts/themes/contracts/contract-version";
 import { THEME_REGISTRY } from "./registry";
 
 // Invariantes estruturais do registro estático (docs/venore-docks.md — "Sobre temas"). Não há

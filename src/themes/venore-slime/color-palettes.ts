@@ -1,4 +1,4 @@
-import type { ColorPalette } from "@/contexts/themes";
+import type { ColorPalette } from "@/contexts/themes/contracts/types";
 
 // Catálogo do Venore Slime — T3, fundação (docs/implementation-roadmap.md — Fase 5): só seleção
 // entre presets pré-definidos em código, ainda sem UI de criar/editar paleta arbitrária (fica

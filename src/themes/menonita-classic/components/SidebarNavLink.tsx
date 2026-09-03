@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { MainNavItem } from "@/contexts/themes";
+import type { MainNavItem } from "@/contexts/themes/contracts/types";
 import { cn } from "@/lib/utils";
 import { NavIcon } from "@/platform/nav-icons/NavIcon";
 import { SIDEBAR_COLLAPSE_TOOLTIP_COLLAPSED_CLASSES, SIDEBAR_COLLAPSE_TOOLTIP_LABEL_CLASSES } from "./sidebar-collapse-tooltip";

@@ -12,12 +12,16 @@ const subscribeNever = () => () => {};
 // sabe o tema resolvido, e a regra react-hooks/set-state-in-effect proíbe setState síncrono
 // dentro de effect.
 export function ColorModeToggle({ className }: { className?: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme, forcedTheme } = useTheme();
   const mounted = useSyncExternalStore(
     subscribeNever,
     () => true,
     () => false,
   );
+
+  // Tema single-mode: o root layout passa `forcedTheme` pro ThemeProvider (manifest.colorModes
+  // com um valor só). Não há o que alternar — o botão não se renderiza.
+  if (forcedTheme) return null;
 
   const isDark = mounted && resolvedTheme === "dark";
 

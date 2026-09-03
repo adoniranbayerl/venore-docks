@@ -30,4 +30,10 @@ describe("THEME_REGISTRY", () => {
       ).toBe(true);
     },
   );
+
+  it.each(entries)("%s: colorModes é não-vazio e só contém light/dark", (_registryKey, entry) => {
+    expect(entry.manifest.colorModes.length).toBeGreaterThan(0);
+    expect(entry.manifest.colorModes.every((mode) => mode === "light" || mode === "dark")).toBe(true);
+    expect(new Set(entry.manifest.colorModes).size).toBe(entry.manifest.colorModes.length);
+  });
 });

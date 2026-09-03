@@ -58,6 +58,11 @@ export default async function RootLayout({
   // texto livre não sanitizado nesta interpolação.
   const paletteOverrideCss = activeColorPalette ? buildColorPaletteOverrideCss(manifest.key, activeColorPalette) : null;
 
+  // Tema single-mode (manifest.colorModes com um só valor): força esse modo no next-themes —
+  // não há "outro" pra alternar. `forcedTheme` desabilita a troca; o ColorModeToggle lê isso e
+  // some. Tema bimodal (o caso atual de todos): forcedColorMode fica undefined e nada muda.
+  const forcedColorMode = manifest.colorModes.length === 1 ? manifest.colorModes[0] : undefined;
+
   return (
     <html
       lang="pt-BR"
@@ -70,7 +75,7 @@ export default async function RootLayout({
             escopado pela posição no DOM) — evita depender de suporte a <head> customizado em
             root layout do App Router (mesmo padrão de ChartStyle, src/components/ui/chart.tsx). */}
         {paletteOverrideCss && <style id="color-palette-override" dangerouslySetInnerHTML={{ __html: paletteOverrideCss }} />}
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem forcedTheme={forcedColorMode}>
           {children}
           <Toaster />
           <ServiceWorkerRegistrar />

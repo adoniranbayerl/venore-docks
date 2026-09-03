@@ -14,4 +14,5 @@ export const aprendaMusicaManifest: ThemeManifest = {
   // Slime, porque é o tom que aparece no PDF de impressão (plugin birthdays) e no traço de acento
   // do footer (caso um outro tema volte a consumir esse campo).
   brandAesthetics: { mode: "text", size: 100, scrolledSize: 80, position: "left", color: "#d9662f" },
+  colorModes: ["light", "dark"],
 };

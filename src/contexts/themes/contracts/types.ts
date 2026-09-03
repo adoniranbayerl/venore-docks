@@ -15,12 +15,20 @@ export type BrandAesthetics = {
   color: string;
 };
 
+// Modos de cor que o tema realmente suporta. Um tema com `["dark"]` (ou `["light"]`) só é
+// single-mode: o root layout força esse modo no next-themes e o botão de color-mode some (não
+// há "outro" modo pra alternar). `["light", "dark"]` = tema bimodal, comportamento atual.
+export type ThemeColorMode = "light" | "dark";
+
 export type ThemeManifest = {
   key: string; // kebab-case, único, estável — mesmo padrão de PluginManifest.key
   name: string;
   version: string;
   themeContractVersion: string; // versão do contrato que o tema foi construído contra
   brandAesthetics: BrandAesthetics;
+  // Extensão aditiva do contrato (campo novo, nada removido) — mesmo critério dos campos aditivos
+  // de HeaderSlotProps, sem bump de themeContractVersion. Ordem não importa; não-vazio.
+  colorModes: readonly ThemeColorMode[];
 };
 
 export type ActiveThemeState = {

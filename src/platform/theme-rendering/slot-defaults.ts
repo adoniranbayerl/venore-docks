@@ -1,4 +1,4 @@
-import type { MainNavItem } from "@/contexts/themes";
+import type { MainNavItem, SitemapItem } from "@/contexts/themes";
 
 // Valores de slot que NÃO vêm de contexts/settings, CMS, auth nem do manifesto do tema — são
 // constantes de plataforma. Antes chegavam via `...venoreSlimeMockProps` (o mock do tema Venore
@@ -16,6 +16,25 @@ export const THEME_SLOT_DEFAULTS = {
   sidebarLeftEnabled: true,
 } as const;
 
-// Fallback pra sidebar nunca ficar vazia quando a leitura do menu "main" do CMS falha
-// (resolve-theme-slot-props.ts). Não é conteúdo de exemplo — é o mínimo pra navegar (link à home).
-export const FALLBACK_MAIN_NAV_ITEMS: MainNavItem[] = [{ key: "home", label: "Home", href: "/", icon: "home" }];
+// Exemplo mínimo de navegação, usado quando o CMS ainda não tem menu configurado pra aquele
+// location (instalação nova) OU a leitura falha — sem isso a sidebar mostra "—" e o rodapé fica
+// só com a marca solta, e o layout parece quebrado. Só rotas que existem no core vanilla
+// (`/`, `/login`), pra nenhum link cair em 404. O admin configura os menus reais em
+// /admin/cms/menus (a partir daí o CMS manda e estes deixam de aparecer).
+export const FALLBACK_MAIN_NAV_ITEMS: MainNavItem[] = [
+  { key: "home", label: "Início", href: "/", icon: "home" },
+  { key: "login", label: "Entrar", href: "/login", icon: "user" },
+];
+
+export const FALLBACK_SITEMAP_ITEMS: SitemapItem[] = [
+  {
+    key: "nav",
+    label: "Navegação",
+    href: null,
+    isExternal: false,
+    children: [
+      { key: "home", label: "Início", href: "/", isExternal: false, children: [] },
+      { key: "login", label: "Entrar", href: "/login", isExternal: false, children: [] },
+    ],
+  },
+];

@@ -21,13 +21,19 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { siteName, faviconUrl } = await getBrandConfig();
+  const { siteName, footerDescription, faviconUrl } = await getBrandConfig();
 
   return {
-    title: "Venore Docks",
-    description: "Painel administrativo e área do aluno da Venore Docks.",
+    // Título vem do nome do site configurado (contexts/settings, /admin/settings/brand) — as
+    // páginas internas põem só o próprio nome via `title` e o template junta " · <site>".
+    title: { default: siteName, template: `%s · ${siteName}` },
+    description: footerDescription,
+    applicationName: siteName,
     manifest: "/manifest.webmanifest",
     appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: siteName },
+    // Sem arquivo-convenção src/app/favicon.ico: o ícone vem SÓ daqui, então o que o admin
+    // escolher em /admin/settings/brand (ou o fallback /brand/favicon.ico) é o que o site usa —
+    // um favicon.ico no app/ ganharia do <link> e travaria a customização.
     icons: {
       icon: faviconUrl,
       shortcut: faviconUrl,

@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { FALLBACK_MAIN_NAV_ITEMS, FALLBACK_SITEMAP_ITEMS } from "./slot-defaults";
 
 const getCurrentUser = vi.fn();
 const getMenuByLocation = vi.fn();
@@ -205,7 +206,9 @@ describe("resolveThemeSlotProps", () => {
 
     const props = await resolveThemeSlotProps(sidebarNavInput());
 
-    expect(props.sidebarLeft.navItems).toEqual([]);
+    // O agregador sem filhos some; como isso zera a lista, cai no exemplo mínimo (não fica "—").
+    expect(props.sidebarLeft.navItems).toEqual(FALLBACK_MAIN_NAV_ITEMS);
+    expect(props.sidebarLeft.navItems.some((item) => item.label === "Recursos Humanos")).toBe(false);
   });
 
   it("carries the icon chosen in the CMS editor through to main-nav items, omitting it when absent", async () => {
@@ -232,13 +235,22 @@ describe("resolveThemeSlotProps", () => {
     ]);
   });
 
-  it("falls back to the mock nav items when the main-nav menu lookup fails", async () => {
+  it("cai no exemplo mínimo de nav quando a leitura do menu main falha", async () => {
     getCurrentUser.mockResolvedValue({ success: true, data: null });
     getMenuByLocation.mockResolvedValue({ success: false, error: { code: "err", message: "boom" } });
 
     const props = await resolveThemeSlotProps(sidebarNavInput());
 
-    expect(props.sidebarLeft.navItems).toEqual([{ key: "home", label: "Home", href: "/", icon: "home" }]);
+    expect(props.sidebarLeft.navItems).toEqual(FALLBACK_MAIN_NAV_ITEMS);
+  });
+
+  it("cai no exemplo mínimo de nav quando o menu main existe mas está vazio (instalação nova)", async () => {
+    getCurrentUser.mockResolvedValue({ success: true, data: null });
+    getMenuByLocation.mockResolvedValue({ success: true, data: [] });
+
+    const props = await resolveThemeSlotProps(sidebarNavInput());
+
+    expect(props.sidebarLeft.navItems).toEqual(FALLBACK_MAIN_NAV_ITEMS);
   });
 
   it("passes collapsed and onToggleCollapsed through to sidebarLeft props", async () => {
@@ -295,16 +307,16 @@ describe("resolveThemeSlotProps", () => {
     expect(getMenuByLocation).toHaveBeenCalledWith({ location: "sitemap" });
   });
 
-  it("resolves footer.sitemapItems to an empty list when there is no menu configured for the sitemap location, without falling back to any mock", async () => {
+  it("cai no exemplo mínimo de sitemap quando não há menu configurado pro location (instalação nova)", async () => {
     getCurrentUser.mockResolvedValue({ success: true, data: null });
     getMenuByLocation.mockResolvedValue({ success: true, data: [] });
 
     const props = await resolveThemeSlotProps(sidebarNavInput());
 
-    expect(props.footer.sitemapItems).toEqual([]);
+    expect(props.footer.sitemapItems).toEqual(FALLBACK_SITEMAP_ITEMS);
   });
 
-  it("resolves footer.sitemapItems to an empty list when the sitemap-location lookup fails", async () => {
+  it("cai no exemplo mínimo de sitemap quando a leitura do menu sitemap falha", async () => {
     getCurrentUser.mockResolvedValue({ success: true, data: null });
     getMenuByLocation.mockImplementation(async ({ location }: { location: string }) => {
       if (location === "sitemap") {
@@ -315,6 +327,6 @@ describe("resolveThemeSlotProps", () => {
 
     const props = await resolveThemeSlotProps(sidebarNavInput());
 
-    expect(props.footer.sitemapItems).toEqual([]);
+    expect(props.footer.sitemapItems).toEqual(FALLBACK_SITEMAP_ITEMS);
   });
 });

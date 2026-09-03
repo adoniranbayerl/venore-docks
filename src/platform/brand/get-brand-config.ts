@@ -32,7 +32,11 @@ const DEFAULTS = {
   logoMediaId: "",
   logoScrolledMediaId: "",
   faviconMediaId: "",
-  footerDescription: "",
+  // Frase de exemplo NEUTRA (não carrega identidade de tenant, mesma regra do siteName) — sem
+  // ela o rodapé fica só com a marca solta num painel vazio. O admin ajusta em
+  // /admin/settings/brand; registerDefaultSetting persiste esta na primeira leitura, então ela
+  // aparece já preenchida no formulário como ponto de partida.
+  footerDescription: "Plataforma modular para conteúdo, comunidade e operação.",
 };
 
 const FALLBACK_LOGO_SVG = "/brand/brand-logo.svg";

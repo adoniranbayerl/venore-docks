@@ -8,7 +8,7 @@ import { collectNotificationAlert } from "@/platform/notifications/notification-
 import { collectUserNavItems } from "@/platform/user-nav/registry";
 import { resolveBrandAesthetics } from "./resolve-brand-aesthetics";
 import { toSitemapItems } from "./to-sitemap-items";
-import { FALLBACK_MAIN_NAV_ITEMS, THEME_SLOT_DEFAULTS } from "./slot-defaults";
+import { FALLBACK_MAIN_NAV_ITEMS, FALLBACK_SITEMAP_ITEMS, THEME_SLOT_DEFAULTS } from "./slot-defaults";
 import type { HeaderSlotProps, HeaderUserInfo, FooterSlotProps, SidebarLeftSlotProps, NavMode, MainNavItem, NavGroup } from "@/contexts/themes";
 
 // item "label" (href null, contexts/cms/contracts/types.ts — MenuItemTarget) é o agregador: só
@@ -82,10 +82,10 @@ export async function resolveThemeSlotProps(sidebarNav: {
   // agregador/accordion na sidebar em vez de ser descartado. header-nav e contextual continuam
   // fora desta sessão (Known Gap, AGENTS.md §7).
   // location "sitemap": menu dedicado (contexts/cms/contracts/types.ts — MenuLocation), distinto
-  // do "main" acima. Sem menu configurado, getMenuByLocation devolve data: [] (nunca falha, nunca
-  // cai pro mock) — footer.sitemapItems fica [] e o componente Sitemap não renderiza a seção. Não
-  // existe fallback pra "todo conteúdo publicado" aqui de propósito: isso violaria o invariante de
-  // contexts/cms de que o sitemap é o que o menu escolheu mostrar, não uma derivação de conteúdo.
+  // do "main" acima. Sem menu configurado (instalação nova) ou com leitura falhando, cai num
+  // exemplo mínimo (FALLBACK_SITEMAP_ITEMS) — não é derivação de "todo conteúdo publicado" (isso
+  // violaria o invariante de contexts/cms de que o sitemap é o que o menu escolheu mostrar), é só
+  // um esqueleto estático pra o rodapé não ficar quebrado antes de o admin configurar o menu.
   const aesthetics = await resolveBrandAesthetics();
   // messageAlert só é consultado pra quem está logado — visitante anônimo nunca tem thread nenhuma
   // (getMessageAlert já devolveria null de qualquer forma, mas evita a query à toa).
@@ -97,8 +97,13 @@ export async function resolveThemeSlotProps(sidebarNav: {
     user ? collectNotificationAlert() : Promise.resolve(null),
     user ? collectUserNavItems() : Promise.resolve([]),
   ]);
-  const mainNavItems: MainNavItem[] = mainMenu.success ? toMainNavItems(mainMenu.data) : FALLBACK_MAIN_NAV_ITEMS;
-  const sitemapItems = sitemapMenu.success ? toSitemapItems(sitemapMenu.data) : [];
+  // Fallback quando o menu está VAZIO (instalação nova, sem menu no CMS) — não só quando a
+  // leitura falha. Sem isso a sidebar renderiza "—" e o rodapé fica sem navegação nenhuma.
+  const resolvedMainNav = mainMenu.success ? toMainNavItems(mainMenu.data) : [];
+  const mainNavItems: MainNavItem[] = resolvedMainNav.length > 0 ? resolvedMainNav : FALLBACK_MAIN_NAV_ITEMS;
+
+  const resolvedSitemap = sitemapMenu.success ? toSitemapItems(sitemapMenu.data) : [];
+  const sitemapItems = resolvedSitemap.length > 0 ? resolvedSitemap : FALLBACK_SITEMAP_ITEMS;
 
   return {
     header: {

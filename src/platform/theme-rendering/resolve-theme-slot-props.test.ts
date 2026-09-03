@@ -23,6 +23,13 @@ vi.mock("@/platform/notifications/notification-registry", () => ({
   collectNotificationAlert: (...args: unknown[]) => collectNotificationAlert(...args),
 }));
 
+// Mesmo motivo: com `user` não-nulo, resolveThemeSlotProps chama collectUserNavItems, que sobe por
+// registerPlugins → listExtensionStates → Postgres real. Nenhuma asserção aqui olha userNavItems,
+// então uma lista vazia basta.
+vi.mock("@/platform/user-nav/registry", () => ({
+  collectUserNavItems: async () => [],
+}));
+
 // resolve-brand-aesthetics (via resolveActiveTheme → @/contexts/themes) e get-brand-config/
 // get-header-behavior (via @/contexts/settings) leem do banco real — sem stub, este teste
 // unitário abre conexão de verdade e trava por timeout quando não há Postgres (AGENTS.md §5).

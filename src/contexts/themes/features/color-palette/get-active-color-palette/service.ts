@@ -7,7 +7,9 @@ import type { ActiveColorPaletteState } from "../../../contracts/types";
 const FALLBACK_ACTIVE_COLOR_PALETTE: ActiveColorPaletteState = { paletteId: "default", activatedAt: null };
 
 export async function getActiveColorPalette(): Promise<GetActiveColorPaletteResult> {
-  const result = await getSetting({ key: "theme.activePaletteId" });
+  // skipCache pelo mesmo motivo de get-active-theme: o override de paleta é aplicado no root
+  // layout de toda rota, e o cache em memória de 300s é por processo (ver GetSettingQuery).
+  const result = await getSetting({ key: "theme.activePaletteId", skipCache: true });
   if (!result.success) {
     return result;
   }

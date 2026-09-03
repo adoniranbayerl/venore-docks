@@ -13,6 +13,12 @@ const cacheKeyFor = (key: string) => `settings:${key}`;
 type CachedSetting = { record: SettingRecord | null };
 
 export async function getSetting(query: GetSettingQuery): Promise<GetSettingResult> {
+  // Chave marcada como skipCache (ver GetSettingQuery): lê sempre do banco e não popula o cache —
+  // um write-through aqui recriaria a entrada defasada que o skipCache existe pra evitar.
+  if (query.skipCache) {
+    return { success: true, data: await findSettingByKey(query.key) };
+  }
+
   const cacheKey = cacheKeyFor(query.key);
   const cached = getCache<CachedSetting>(cacheKey);
   if (cached) {

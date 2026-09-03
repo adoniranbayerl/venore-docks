@@ -17,7 +17,7 @@ describe("getActiveTheme", () => {
     const { getActiveTheme } = await import("./service");
     const result = await getActiveTheme();
 
-    expect(getSetting).toHaveBeenCalledWith({ key: "theme.active" });
+    expect(getSetting).toHaveBeenCalledWith({ key: "theme.active", skipCache: true });
     expect(result).toEqual({ success: true, data: { themeKey: "custom", activatedAt: new Date("2026-01-01") } });
   });
 

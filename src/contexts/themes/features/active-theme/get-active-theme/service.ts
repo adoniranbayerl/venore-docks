@@ -7,7 +7,10 @@ import type { ActiveThemeState } from "../../../contracts/types";
 const FALLBACK_ACTIVE_THEME: ActiveThemeState = { themeKey: "venore-slime", activatedAt: null };
 
 export async function getActiveTheme(): Promise<GetActiveThemeResult> {
-  const result = await getSetting({ key: "theme.active" });
+  // skipCache: `theme.active` alimenta o `data-theme` do <html> em toda rota; o cache em memória
+  // de 300s é por processo e num deploy multi-instância deixa instâncias servindo o tema anterior
+  // por minutos após a troca (ver GetSettingQuery). resolveActiveTheme já memoiza por request.
+  const result = await getSetting({ key: "theme.active", skipCache: true });
   if (!result.success) {
     return result;
   }

@@ -20,7 +20,7 @@ describe("getActiveColorPalette", () => {
     const { getActiveColorPalette } = await import("./service");
     const result = await getActiveColorPalette();
 
-    expect(getSetting).toHaveBeenCalledWith({ key: "theme.activePaletteId" });
+    expect(getSetting).toHaveBeenCalledWith({ key: "theme.activePaletteId", skipCache: true });
     expect(result).toEqual({ success: true, data: { paletteId: "oceano", activatedAt: new Date("2026-01-01") } });
   });
 

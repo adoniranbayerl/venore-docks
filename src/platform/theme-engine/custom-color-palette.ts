@@ -47,7 +47,9 @@ export async function setCustomColorPalette(input: CustomColorPaletteInput): Pro
 }
 
 export async function getCustomColorPalette(): Promise<ColorPalette> {
-  const result = await getSetting({ key: SETTING_KEY });
+  // skipCache: a paleta personalizada vira CSS de override no root layout de toda rota — mesma
+  // defasagem multi-instância que afeta theme.active/theme.activePaletteId (ver GetSettingQuery).
+  const result = await getSetting({ key: SETTING_KEY, skipCache: true });
   const stored = result.success && result.data ? (result.data.value as StoredCustomColorPalette) : null;
 
   return {

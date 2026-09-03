@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { activateTheme, CURRENT_THEME_CONTRACT_VERSION } from "@/contexts/themes";
 import { setSetting } from "@/contexts/settings";
+import { activateTheme } from "@/platform/theme-engine/activate-theme";
 import { toggleThemeEnabled } from "@/platform/theme-engine/toggle-theme-enabled";
 import { activateColorPalette } from "@/platform/theme-engine/activate-color-palette";
 import { setCustomColorPalette } from "@/platform/theme-engine/custom-color-palette";
@@ -27,7 +27,7 @@ export async function activateThemeAction(
 ): Promise<ThemesActionState> {
   const themeKey = String(formData.get("themeKey") ?? "");
 
-  const result = await activateTheme({ themeKey, themeContractVersion: CURRENT_THEME_CONTRACT_VERSION });
+  const result = await activateTheme({ themeKey });
 
   if (!result.success) {
     return { error: result.error.message };

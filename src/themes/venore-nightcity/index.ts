@@ -5,3 +5,4 @@ export { venoreNightcityManifest } from "./manifest";
 // UserMenu, SidebarNavLink na lista mobile) — são mecânica genérica ou widgets de folha, não a
 // decisão de arranjo do Shell em si.
 export { Shell } from "./components/Shell";
+export { VENORE_NIGHTCITY_COLOR_PALETTES } from "./color-palettes";

@@ -7,3 +7,4 @@ export { venoreFrostManifest } from "./manifest";
 // a Shell do Slime antes de ganhar arranjo próprio — aqui o reaproveitamento é a decisão final,
 // não um placeholder).
 export { Shell } from "../venore-pulse/components/Shell";
+export { VENORE_FROST_COLOR_PALETTES } from "./color-palettes";

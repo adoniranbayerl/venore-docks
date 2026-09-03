@@ -12,9 +12,9 @@ import * as aprendaMusica from "./aprenda-musica";
 export type ThemeShellComponent = ComponentType<ThemeShellProps>;
 
 // colorPalettes (T3, docs/implementation-roadmap.md — Fase 5): catálogo de paletas salváveis do
-// tema, mesmo raciocínio de `Shell` — cada tema declara o próprio, os valores partem da paleta
-// base do theme.css daquele tema específico. [] = tema ainda sem catálogo (todos exceto
-// venore-slime nesta fundação).
+// tema — cada tema declara o próprio em color-palettes.ts, hoje via generateHueRotationPalettes
+// (src/themes/generate-hue-rotation-palettes.ts) a partir dos tokens de hue de marca do seu
+// próprio theme.css. `[]` continua válido (tema sem catálogo).
 export type ThemeRegistryEntry = { manifest: ThemeManifest; Shell: ThemeShellComponent; colorPalettes: ColorPalette[] };
 
 // Registro dos temas instalados em código (docs/venore-docks.md — "Sobre temas"). Next.js exige
@@ -31,36 +31,36 @@ export const THEME_REGISTRY: Record<string, ThemeRegistryEntry> = {
   "venore-basic": {
     manifest: venoreBasic.venoreBasicManifest,
     Shell: venoreBasic.Shell,
-    colorPalettes: [],
+    colorPalettes: venoreBasic.VENORE_BASIC_COLOR_PALETTES,
   },
   "venore-nightcity": {
     manifest: venoreNightcity.venoreNightcityManifest,
     Shell: venoreNightcity.Shell,
-    colorPalettes: [],
+    colorPalettes: venoreNightcity.VENORE_NIGHTCITY_COLOR_PALETTES,
   },
   "venore-kazordoon": {
     manifest: venoreKazordoon.venoreKazordoonManifest,
     Shell: venoreKazordoon.Shell,
-    colorPalettes: [],
+    colorPalettes: venoreKazordoon.VENORE_KAZORDOON_COLOR_PALETTES,
   },
   "venore-pulse": {
     manifest: venorePulse.venorePulseManifest,
     Shell: venorePulse.Shell,
-    colorPalettes: [],
+    colorPalettes: venorePulse.VENORE_PULSE_COLOR_PALETTES,
   },
   "venore-frost": {
     manifest: venoreFrost.venoreFrostManifest,
     Shell: venoreFrost.Shell,
-    colorPalettes: [],
+    colorPalettes: venoreFrost.VENORE_FROST_COLOR_PALETTES,
   },
   "menonita-classic": {
     manifest: menonitaClassic.menonitaClassicManifest,
     Shell: menonitaClassic.Shell,
-    colorPalettes: [],
+    colorPalettes: menonitaClassic.MENONITA_CLASSIC_COLOR_PALETTES,
   },
   "aprenda-musica": {
     manifest: aprendaMusica.aprendaMusicaManifest,
     Shell: aprendaMusica.Shell,
-    colorPalettes: [],
+    colorPalettes: aprendaMusica.APRENDA_MUSICA_COLOR_PALETTES,
   },
 };

@@ -6,3 +6,4 @@ export { aprendaMusicaManifest } from "./manifest";
 // mesmo precedente já usado pelo Venore Nightcity/Pulse (ver comentário em cada arquivo de
 // components/) — porque são mecânica genérica, não a decisão de arranjo/visual em si.
 export { Shell } from "./components/Shell";
+export { APRENDA_MUSICA_COLOR_PALETTES } from "./color-palettes";

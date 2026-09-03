@@ -45,7 +45,11 @@ export async function runPluginMigrations(pluginKey: string): Promise<OperationR
     kind: "write",
   });
 
-  const migrationsFolder = path.resolve(process.cwd(), "src/plugins", pluginKey, manifest.migrationsPath);
+  // O plugin é um pacote npm `@venore/plugin-<key>`; a árvore de migrations vem junto no pacote
+  // (`exports["./migrations/*"]`). Roda em Node no install — resolve direto no node_modules do
+  // host (require.resolve com specifier dinâmico quebraria o bundle do turbopack).
+  const pluginPackageDir = path.join(process.cwd(), "node_modules", "@venore", `plugin-${pluginKey}`);
+  const migrationsFolder = path.resolve(pluginPackageDir, manifest.migrationsPath);
   const migrationsSchema = resolveMigrationsSchema(pluginKey, manifest.migrationsSchema);
   const migrationsTable = manifest.migrationsTable ?? "__drizzle_migrations";
 

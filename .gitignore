@@ -43,7 +43,7 @@ yarn-error.log*
 # de cada instância. Default de MEDIA_FILESYSTEM_ROOT.
 /media-storage/
 
-# Gerados por scripts/gen-plugin-registry.ts a partir das pastas de plugin presentes
+# Gerados por scripts/gen-plugin-registry.ts a partir das deps @venore/plugin-* do package.json
 # (postinstall/predev/prebuild). Ver docs/plugins-repos-separados-plano.md.
 /src/plugins/registry.generated.ts
 /src/plugins/route-registry.generated.ts
@@ -52,16 +52,8 @@ yarn-error.log*
 /src/plugins/plugin-keys.generated.ts
 /src/plugins/plugin-barrels.generated.ts
 
-# Cada plugin é um repo próprio, sincronizado por `npm run sync:plugins` para src/plugins/<key>/
-# (opção 3, docs/plugins-repos-separados-plano.md). Nada de plugin é versionado no core — só os
-# reexports diretos (registry.ts etc.) e os fixtures _fixture-cross-* do teste de boundary.
-/src/plugins/*/
-!/src/plugins/_fixture-cross-a/
-!/src/plugins/_fixture-cross-b/
-
-# Config por-instância de quais plugins sincronizar (alternativa ao env VENORE_PLUGINS). Nunca
-# versionada — evita conflito de merge no core. Ver venore.plugins.example.json.
-/venore.plugins.json
+# Cada plugin é um PACOTE npm (@venore/plugin-<key>) — instala em node_modules, nunca em
+# src/plugins/. Só os fixtures _fixture-cross-* do teste de boundary continuam versionados lá.
 
 # broadcast plugin — vídeos são específicos de cada deploy/servidor, nunca devem ir pro Git
 # (arquivos grandes). .gitkeep preserva a pasta vazia num clone novo.

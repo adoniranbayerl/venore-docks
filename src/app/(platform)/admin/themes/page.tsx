@@ -9,6 +9,23 @@ import { ToggleThemeControl } from "./_components/toggle-theme-control";
 import { ActivateColorPaletteButton } from "./_components/activate-color-palette-button";
 import { CustomColorPaletteForm } from "./_components/custom-color-palette-form";
 import { HeaderBehaviorForm } from "./_components/header-behavior-form";
+import type { PaletteColorTokens } from "@/contexts/themes";
+
+// Tira de amostras da paleta (primary/accent/background/text que ela define). "Padrão do tema"
+// não define nenhuma → um quadrinho com a primary do tema ativo, só pra não ficar em branco.
+function PaletteSwatches({ tokens }: { tokens: PaletteColorTokens }) {
+  const swatches = (["primary", "accent", "background", "foreground"] as const)
+    .map((token) => tokens[token])
+    .filter((value): value is string => Boolean(value));
+  const shown = swatches.length > 0 ? swatches : ["var(--primary)"];
+  return (
+    <span aria-hidden className="flex shrink-0 overflow-hidden rounded-md border border-border">
+      {shown.map((color, index) => (
+        <span key={index} className="size-4" style={{ background: color }} />
+      ))}
+    </span>
+  );
+}
 
 export default async function ThemesAdminPage() {
   const gate = await getSettingsPageData();
@@ -78,11 +95,7 @@ export default async function ThemesAdminPage() {
           {colorPaletteStates.palettes.map((palette) => (
             <li key={palette.id} className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className="size-4 rounded-full border border-border"
-                  style={{ background: palette.light.primary ?? "var(--primary)" }}
-                />
+                <PaletteSwatches tokens={palette.light} />
                 <span className="font-medium text-foreground">{palette.name}</span>
                 {palette.isActive && <Badge variant="secondary">Ativa</Badge>}
               </div>

@@ -10,12 +10,15 @@ import { CUSTOM_COLOR_PALETTE_ID, getCustomColorPalette } from "@/platform/theme
 // motivo de resolveActiveTheme/resolveBrandAesthetics: usado tanto no root layout (aplica o
 // override) quanto potencialmente em telas admin no mesmo request.
 export const resolveActiveColorPalette = cache(async (): Promise<ColorPalette | null> => {
-  const [{ colorPalettes }, activePaletteResult] = await Promise.all([resolveActiveTheme(), getActiveColorPalette()]);
+  const [{ colorPalettes, manifest }, activePaletteResult] = await Promise.all([
+    resolveActiveTheme(),
+    getActiveColorPalette(),
+  ]);
   if (!activePaletteResult.success) return null;
 
   const paletteId = activePaletteResult.data.paletteId;
   if (paletteId === "default") return null;
-  if (paletteId === CUSTOM_COLOR_PALETTE_ID) return getCustomColorPalette();
+  if (paletteId === CUSTOM_COLOR_PALETTE_ID) return getCustomColorPalette(manifest.key);
 
   return colorPalettes.find((palette) => palette.id === paletteId) ?? null;
 });

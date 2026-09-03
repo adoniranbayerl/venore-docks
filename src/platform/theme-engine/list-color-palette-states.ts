@@ -11,11 +11,11 @@ export type ColorPaletteStateView = ColorPalette & { isActive: boolean };
 // "default" (nenhuma paleta ativada — usar theme.css como está) é sempre o primeiro item, mesmo
 // quando o catálogo do tema está vazio.
 export async function listColorPaletteStates(): Promise<{ themeName: string; palettes: ColorPaletteStateView[] }> {
-  const [{ manifest, colorPalettes }, activePaletteResult, customPalette] = await Promise.all([
+  const [{ manifest, colorPalettes }, activePaletteResult] = await Promise.all([
     resolveActiveTheme(),
     getActiveColorPalette(),
-    getCustomColorPalette(),
   ]);
+  const customPalette = await getCustomColorPalette(manifest.key);
 
   const activePaletteId = activePaletteResult.success ? activePaletteResult.data.paletteId : "default";
 

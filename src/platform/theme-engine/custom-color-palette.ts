@@ -2,12 +2,17 @@ import { getSetting, setSetting } from "@/contexts/settings";
 import type { ColorPalette, PaletteColorTokens } from "@/contexts/themes";
 import type { OperationResult } from "@/shared/types";
 import { CUSTOM_COLOR_PALETTE_ID } from "./custom-color-palette-id";
+import { contrastRatio, MIN_CUSTOM_PALETTE_CONTRAST } from "./contrast";
 
 export { CUSTOM_COLOR_PALETTE_ID };
 
-const SETTING_KEY = "theme.customColorPalette";
+// Uma paleta personalizada POR TEMA — a chave carrega o themeKey. Antes era uma chave global
+// (`theme.customColorPalette`), então trocar de tema mantinha as cores personalizadas por cima
+// de uma base diferente. Agora a paleta viaja com o tema, igual aos presets de catálogo.
+const SETTING_KEY_PREFIX = "theme.customColorPalette";
+const settingKeyFor = (themeKey: string) => `${SETTING_KEY_PREFIX}.${themeKey}`;
 
-// Vocabulário deliberadamente menor que PaletteColorToken (pedido desta sessão: só primary/
+// Vocabulário deliberadamente menor que PaletteColorToken (pedido de sessão anterior: só primary/
 // secondary/background/text) — cada um mapeia 1:1 pra uma var shadcn de theme.css (AGENTS.md §3).
 const CUSTOM_COLOR_TOKENS = ["primary", "secondary", "background", "foreground"] as const;
 type CustomColorToken = (typeof CUSTOM_COLOR_TOKENS)[number];
@@ -28,7 +33,21 @@ function hasOnlyValidHexTokens(tokens: PaletteColorTokens): boolean {
   );
 }
 
-export async function setCustomColorPalette(input: CustomColorPaletteInput): Promise<OperationResult<{ id: string }>> {
+// Só checa quando os DOIS tokens do par existem naquele modo — um modo que só mexe em `primary`
+// não é barrado. Retorna a mensagem de erro, ou null se está ok.
+function contrastProblem(tokens: PaletteColorTokens, modeLabel: string): string | null {
+  const fg = tokens.foreground;
+  const bg = tokens.background;
+  if (!fg || !bg) return null;
+  const ratio = contrastRatio(fg, bg);
+  if (ratio >= MIN_CUSTOM_PALETTE_CONTRAST) return null;
+  return `Contraste texto/fundo no ${modeLabel} é ${ratio.toFixed(1)}:1 — mínimo ${MIN_CUSTOM_PALETTE_CONTRAST}:1 pra legibilidade.`;
+}
+
+export async function setCustomColorPalette(
+  themeKey: string,
+  input: CustomColorPaletteInput,
+): Promise<OperationResult<{ id: string }>> {
   if (!hasOnlyValidHexTokens(input.light) || !hasOnlyValidHexTokens(input.dark)) {
     return {
       success: false,
@@ -39,17 +58,25 @@ export async function setCustomColorPalette(input: CustomColorPaletteInput): Pro
     };
   }
 
+  const contrastError = contrastProblem(input.light, "modo claro") ?? contrastProblem(input.dark, "modo escuro");
+  if (contrastError) {
+    return {
+      success: false,
+      error: { code: "theme-engine.custom_color_palette.low_contrast", message: contrastError },
+    };
+  }
+
   const stored: StoredCustomColorPalette = { light: input.light, dark: input.dark };
-  const result = await setSetting({ key: SETTING_KEY, value: stored });
+  const result = await setSetting({ key: settingKeyFor(themeKey), value: stored });
   if (!result.success) return result;
 
   return { success: true, data: { id: CUSTOM_COLOR_PALETTE_ID } };
 }
 
-export async function getCustomColorPalette(): Promise<ColorPalette> {
+export async function getCustomColorPalette(themeKey: string): Promise<ColorPalette> {
   // skipCache: a paleta personalizada vira CSS de override no root layout de toda rota — mesma
   // defasagem multi-instância que afeta theme.active/theme.activePaletteId (ver GetSettingQuery).
-  const result = await getSetting({ key: SETTING_KEY, skipCache: true });
+  const result = await getSetting({ key: settingKeyFor(themeKey), skipCache: true });
   const stored = result.success && result.data ? (result.data.value as StoredCustomColorPalette) : null;
 
   return {

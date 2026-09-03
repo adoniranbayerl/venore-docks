@@ -6,6 +6,7 @@ import { activateTheme } from "@/platform/theme-engine/activate-theme";
 import { toggleThemeEnabled } from "@/platform/theme-engine/toggle-theme-enabled";
 import { activateColorPalette } from "@/platform/theme-engine/activate-color-palette";
 import { setCustomColorPalette } from "@/platform/theme-engine/custom-color-palette";
+import { resolveActiveTheme } from "@/platform/theme-rendering/resolve-active-theme";
 import { HEADER_BEHAVIOR_SETTING_KEYS } from "@/platform/header-behavior/get-header-behavior";
 
 export type ThemesActionState = { error: string | null };
@@ -115,7 +116,12 @@ export async function updateCustomColorPaletteAction(
     return result;
   }
 
-  const saveResult = await setCustomColorPalette({ light: readTokens("light"), dark: readTokens("dark") });
+  // A paleta personalizada é por tema (setting keyed no themeKey) — salva contra o tema ativo.
+  const { manifest } = await resolveActiveTheme();
+  const saveResult = await setCustomColorPalette(manifest.key, {
+    light: readTokens("light"),
+    dark: readTokens("dark"),
+  });
   if (!saveResult.success) {
     return { error: saveResult.error.message };
   }

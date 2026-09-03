@@ -6,7 +6,9 @@
 //   - push: handlers push + notificationclick no fim do arquivo.
 //
 // Pra invalidar o shell, incremente SHELL_VERSION.
-const SHELL_VERSION = "v1";
+// v2: purga o /brand/favicon.ico antigo (JPEG quebrado) que ficou preso no cache stale-while-
+// revalidate de instalações que carregaram o site antes da correção do favicon.
+const SHELL_VERSION = "v2";
 const SHELL_CACHE = `shell-${SHELL_VERSION}`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png", "/icons/icon-512.png"];

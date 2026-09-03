@@ -33,6 +33,18 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        // O navegador pede GET /favicon.ico na raiz por conta própria (aba, favoritos, histórico),
+        // independente do <link rel="icon"> no <head>. Sem src/app/favicon.ico (removido pra não
+        // travar a customização do admin), isso daria 404. Aqui aponta pro fallback de marca — o
+        // <link> do metadata ainda manda pra aba quando há um favicon customizado.
+        source: "/favicon.ico",
+        destination: "/brand/favicon.ico",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

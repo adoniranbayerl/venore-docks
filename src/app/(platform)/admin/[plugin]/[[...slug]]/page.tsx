@@ -14,8 +14,15 @@ export default async function AdminPluginRoutePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { plugin, slug } = await params;
-  const resolved = await resolveAdminPluginRoute(plugin, slug ?? []);
+  // Normaliza: neste Next o optional catch-all pode entregar `[""]` (ou `[]`) pra /admin/<plugin>
+  // sem segmento extra — sem filtrar os vazios, o padrão "" da route-table do plugin (raiz) não
+  // casava e a rota virava 404 (o link "Erasto League"/"Broadcast" na nav do admin).
+  const segments = (slug ?? []).filter((segment) => segment.length > 0);
+  const resolved = await resolveAdminPluginRoute(plugin, segments);
   if (!resolved) {
+    console.error(
+      `[admin-plugin-route] sem match: plugin=${JSON.stringify(plugin)} rawSlug=${JSON.stringify(slug)} segments=${JSON.stringify(segments)}`,
+    );
     notFound();
   }
 
